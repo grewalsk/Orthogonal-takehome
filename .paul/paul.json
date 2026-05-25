@@ -1,0 +1,25 @@
+{
+  "name": "Orthogonal-takehome",
+  "version": "0.0.0",
+  "milestone": {
+    "name": "v0.1 Take-Home Submission",
+    "version": "0.1.0",
+    "status": "in_progress"
+  },
+  "phase": {
+    "number": 1,
+    "name": "Bootstrap and verification",
+    "status": "in_progress"
+  },
+  "loop": {
+    "plan": null,
+    "position": "IDLE"
+  },
+  "timestamps": {
+    "created_at": "2026-05-25T22:59:33Z",
+    "updated_at": "2026-05-25T22:59:33Z"
+  },
+  "satellite": {
+    "groom": true
+  }
+}
