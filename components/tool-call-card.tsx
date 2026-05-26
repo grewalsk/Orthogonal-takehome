@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { Check, Loader2, AlertCircle, ChevronDown, ChevronRight } from "lucide-react";
+import { ContactCard } from "@/components/contact-card";
+import { CompanyCard } from "@/components/company-card";
+import { SearchResultList } from "@/components/search-result-list";
 
 interface Props {
   part: ToolPart;
@@ -80,7 +83,7 @@ export function ToolCallCard({ part }: Props) {
 
       {state === "output-available" && output?.summary && (
         <div className="border-t border-zinc-200 px-3 py-2 dark:border-zinc-800">
-          <SummaryRows summary={output.summary} />
+          <SummaryBlock endpoint={output.endpoint} summary={output.summary} />
         </div>
       )}
 
@@ -139,6 +142,28 @@ function summarizeInput(input: unknown): string | null {
     })
     .join(", ");
   return rendered.length > 80 ? rendered.slice(0, 80) + "..." : rendered;
+}
+
+function SummaryBlock({
+  endpoint,
+  summary,
+}: {
+  endpoint?: string;
+  summary: Record<string, unknown>;
+}) {
+  if (endpoint === "apollo /api/v1/people/match") {
+    return <ContactCard summary={summary} />;
+  }
+  if (
+    endpoint === "apollo /api/v1/organizations/enrich" ||
+    endpoint === "hunter /v2/companies/find"
+  ) {
+    return <CompanyCard summary={summary} />;
+  }
+  if (endpoint === "linkup /search") {
+    return <SearchResultList summary={summary} />;
+  }
+  return <SummaryRows summary={summary} />;
 }
 
 function SummaryRows({ summary }: { summary: Record<string, unknown> }) {
