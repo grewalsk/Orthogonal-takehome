@@ -1,4 +1,4 @@
-import { cacheKey, getCacheClient, type CachedRunResult } from "@/lib/cache";
+import { cacheKey, type CachedRunResult, withSingleFlight } from "@/lib/cache";
 
 const BASE = process.env.ORTHOGONAL_BASE_URL ?? "https://api.orthogonal.com";
 
@@ -103,47 +103,47 @@ export interface CallOrthResult {
 
 export async function callOrth(opts: CallOrthOptions): Promise<CallOrthResult> {
   const cacheable = opts.cacheable ?? true;
-  if (cacheable) {
-    const key = cacheKey(opts.endpointSlug, opts.params);
-    const cached = await getCacheClient().get<CachedRunResult>(key);
-    if (cached) {
-      logCall({
-        endpoint: opts.endpointSlug,
-        durationMs: 0,
-        status: 200,
-        priceCents: cached.priceCents,
-        cacheHit: true,
-        upstreamRequestId: cached.upstreamRequestId,
-      });
-      return {
-        data: cached.data,
-        priceCents: cached.priceCents,
-        upstreamRequestId: cached.upstreamRequestId,
-        cacheHit: true,
-        coalesced: false,
-      };
-    }
+  if (!cacheable) {
+    checkBreaker(Date.now());
+    return callWithRetry(opts);
   }
 
-  checkBreaker(Date.now());
+  const key = cacheKey(opts.endpointSlug, opts.params);
+  const ttl = opts.cacheTtlSeconds ?? ttlForEndpoint(opts.endpointSlug);
 
-  const result = await callWithRetry(opts);
-
-  if (cacheable) {
-    const key = cacheKey(opts.endpointSlug, opts.params);
-    await getCacheClient().set(
-      key,
-      {
+  const { value, cached, coalesced } = await withSingleFlight<CachedRunResult>(
+    key,
+    ttl,
+    async () => {
+      checkBreaker(Date.now());
+      const result = await callWithRetry(opts);
+      return {
         data: result.data,
         priceCents: result.priceCents,
         upstreamRequestId: result.upstreamRequestId,
         cachedAt: Date.now(),
-      },
-      opts.cacheTtlSeconds ?? ttlForEndpoint(opts.endpointSlug),
-    );
+      };
+    },
+  );
+
+  if (cached) {
+    logCall({
+      endpoint: opts.endpointSlug,
+      durationMs: 0,
+      status: 200,
+      priceCents: value.priceCents,
+      cacheHit: true,
+      upstreamRequestId: value.upstreamRequestId,
+    });
   }
 
-  return result;
+  return {
+    data: value.data,
+    priceCents: value.priceCents,
+    upstreamRequestId: value.upstreamRequestId,
+    cacheHit: cached,
+    coalesced,
+  };
 }
 
 async function callWithRetry(opts: CallOrthOptions): Promise<CallOrthResult> {

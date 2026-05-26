@@ -6,21 +6,22 @@ See: `.paul/PROJECT.md` (updated 2026-05-25)
 Canonical spec: `SPEC.md` at repo root.
 
 **Core value:** Real-data research chat with a context engineering layer that keeps per-turn input cost roughly flat as the conversation grows.
-**Current focus:** Phases 1 and 2 complete. Ready for Phase 3 (persistence and infrastructure, steps 11 through 14).
+**Current focus:** Phases 1, 2, 3 complete. Ready for Phase 4 (chat loop backend, steps 15 through 16).
 
 ## Current Position
 
 Milestone: v0.1 Take-Home Submission
-Phase: 2 of 7 (Catalog and integration layer) COMPLETE. Next: Phase 3.
+Phase: 3 of 7 (Persistence and infrastructure) COMPLETE. Next: Phase 4.
 Plan: None yet (proceeding directly per the build agreement in conversation)
-Status: Typed tool palette compiles. Tomba projection validated against real upstream payload from probe (deliverable, score 99). Other 8 projections unverified until Phase 4 end-to-end.
-Last activity: 2026-05-25, Phase 2 step 10. lib/orthogonal/tools.generated.ts written with 9 tools all using a shared executeTool() helper that wires inputSchema -> callOrth -> storeToolResult -> project. Hand-written rather than script-generated (mechanical structure, 9 entries, no domain logic to justify generator).
+Status: Neon Postgres reachable in 136ms cold, schema applied, 3 tables + 4 indexes live. Upstash Redis reachable, UpstashCache + Ratelimit wired. withSingleFlight coalescing verified (5 concurrent calls -> 1 fetch). storeToolResult/loadToolResult round-trip through tool_calls table.
+Last activity: 2026-05-25, Phase 3 step 14 sanity check passed. Single-flight pattern correctly coalesces concurrent identical calls per SPEC.md section 5.5.
 
 Progress:
-- Milestone: [▓▓▓░░░░░░░] ~29% (2 of 7 phases)
+- Milestone: [▓▓▓▓▓░░░░░] ~43% (3 of 7 phases)
 - Phase 1: [▓▓▓▓▓▓▓▓▓▓] 100% (5 of 5 steps)
 - Phase 2: [▓▓▓▓▓▓▓▓▓▓] 100% (5 of 5 steps)
-- Phase 3: [░░░░░░░░░░] 0% (0 of 4 steps)
+- Phase 3: [▓▓▓▓▓▓▓▓▓▓] 100% (4 of 4 steps)
+- Phase 4: [░░░░░░░░░░] 0% (0 of 2 steps)
 
 ## Loop Position
 
@@ -72,9 +73,9 @@ None. Both API keys received and verified. Tomba `/v1/email-verifier` call succe
 ## Session Continuity
 
 Last session: 2026-05-25
-Stopped at: Phase 2 complete. Snapshot script, curated set, 9 projections, client wrapper, and tools.generated.ts all in. Tomba sanity check passed.
-Next action: Phase 3 step 11, stand up Neon Postgres. User will need to provision a Neon project and provide `DATABASE_URL` for `.env.local`. Then step 12 (Drizzle schema from `SPEC.md` §9.3), step 13 (Upstash Redis credentials), step 14 (real `withSingleFlight` + `storeToolResult`/`loadToolResult` replacements).
-Resume file: `.paul/PROJECT.md` + `SPEC.md` §9 (full data layer spec) + §13 (steps 11 through 14).
+Stopped at: Phase 3 complete. Neon + Upstash both live, schema migrated, single-flight verified.
+Next action: Phase 4 step 15, write `/api/chat/route.ts` with `streamText` against Sonnet 4.6, the typed Orthogonal tools, and basic message persistence. Step 16 verifies via curl. AI SDK 6 may differ from spec §8 snippet (which references v5); flagged for verification during step 15.
+Resume file: `.paul/PROJECT.md` + `SPEC.md` §5 (request lifecycle), §8 (LLM config), §9.5 (route handler), §13 step 15 to 16.
 
 ---
 *STATE.md, updated after every significant action.*
