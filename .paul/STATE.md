@@ -6,22 +6,23 @@ See: `.paul/PROJECT.md` (updated 2026-05-25)
 Canonical spec: `SPEC.md` at repo root.
 
 **Core value:** Real-data research chat with a context engineering layer that keeps per-turn input cost roughly flat as the conversation grows.
-**Current focus:** Phases 1, 2, 3 complete. Ready for Phase 4 (chat loop backend, steps 15 through 16).
+**Current focus:** Phases 1, 2, 3, 4 complete. Ready for Phase 5 (context engineering primitives, steps 17 through 24).
 
 ## Current Position
 
 Milestone: v0.1 Take-Home Submission
-Phase: 3 of 7 (Persistence and infrastructure) COMPLETE. Next: Phase 4.
+Phase: 4 of 7 (Chat loop backend) COMPLETE. Next: Phase 5.
 Plan: None yet (proceeding directly per the build agreement in conversation)
-Status: Neon Postgres reachable in 136ms cold, schema applied, 3 tables + 4 indexes live. Upstash Redis reachable, UpstashCache + Ratelimit wired. withSingleFlight coalescing verified (5 concurrent calls -> 1 fetch). storeToolResult/loadToolResult round-trip through tool_calls table.
-Last activity: 2026-05-25, Phase 3 step 14 sanity check passed. Single-flight pattern correctly coalesces concurrent identical calls per SPEC.md section 5.5.
+Status: End-to-end chat loop verified. Single curl POST to /api/chat with a "verify support@vercel.com" prompt streamed full SSE: start -> tool-input-delta -> tool-output-available (tomba projection, score 99) -> text-delta -> finish. Postgres persisted user + assistant rows and a tool_calls row with 4603-byte raw payload. Cost: 1c orthogonal + ~2c LLM = 3c total for the turn.
+Last activity: 2026-05-25, Phase 4 steps 15+16. Surfaced and fixed two harness env collisions (ANTHROPIC_BASE_URL without /v1, empty ANTHROPIC_API_KEY) via lib/env.ts force-override and explicit baseURL in createAnthropic. Switched default Node to 22 (Next.js 16 requires >=20.9).
 
 Progress:
-- Milestone: [▓▓▓▓▓░░░░░] ~43% (3 of 7 phases)
+- Milestone: [▓▓▓▓▓▓░░░░] ~57% (4 of 7 phases)
 - Phase 1: [▓▓▓▓▓▓▓▓▓▓] 100% (5 of 5 steps)
 - Phase 2: [▓▓▓▓▓▓▓▓▓▓] 100% (5 of 5 steps)
 - Phase 3: [▓▓▓▓▓▓▓▓▓▓] 100% (4 of 4 steps)
-- Phase 4: [░░░░░░░░░░] 0% (0 of 2 steps)
+- Phase 4: [▓▓▓▓▓▓▓▓▓▓] 100% (2 of 2 steps)
+- Phase 5: [░░░░░░░░░░] 0% (0 of 8 steps)
 
 ## Loop Position
 
@@ -53,6 +54,12 @@ Recorded in `.paul/PROJECT.md` Key Decisions table. Seven decisions locked from 
   - **`/v1/run` shape depends on upstream method.** GET endpoints with queryParams take `{api, path, query: {...}}`. POST endpoints with bodyParams take `{api, path, body: {...}}`. The `SPEC.md` §6.4 example uses `body` for Apollo (correct since Apollo people-match is POST) but does not generalize. `lib/orthogonal/client.ts` in Phase 2 step 9 must select the wrapper field per endpoint method. Confirmed via the `/v1/integrate` canonical SDK snippet.
   - **`@orth/sdk` exists.** The `/v1/integrate` response references `import Orthogonal from "@orth/sdk"`. Spec locks REST (§2 decision 1); not adopting the SDK, but flagging for awareness.
 
+- **Phase 4 deviations / fixes (2026-05-25):**
+  - **Node default upgraded to 22.14.0.** Next.js 16 requires Node >=20.9; Node 18.20.8 (our original install) refuses to start `next dev`. User opted to set `nvm alias default 22.14.0`. Added `.nvmrc` so future clones get the right version automatically. pnpm stays pinned at 9.15.4 (pnpm 11 has a new minimum-release-age supply-chain policy that rejects our recently-published deps).
+  - **`ANTHROPIC_BASE_URL` env-var collision.** Claude Code's harness exports `ANTHROPIC_BASE_URL=https://api.anthropic.com` (no `/v1`), which leaks into the Next dev process. `@ai-sdk/anthropic` reads it and constructs `${base}/messages` -> 404. Fixed by passing `baseURL: "https://api.anthropic.com/v1"` explicitly to `createAnthropic` in `lib/llm.ts`.
+  - **`ANTHROPIC_API_KEY` env-var collision.** Harness sets the var to empty string. Next.js does NOT override existing env vars when loading `.env.local`. Fixed via new `lib/env.ts` which runs `dotenv.config({ path: ".env.local", override: true })` at module load, imported as the first line of `lib/llm.ts`. Document this in the README so reviewers running locally are not surprised.
+  - **AsyncLocalStorage propagates cleanly through `streamText` + `toUIMessageStreamResponse()`.** Tool execute callbacks see the `requestContext` set by the route handler, so `storeToolResult` can write `tool_calls` rows with the right conversationId + messageId.
+
 - **MCP spike outcome (Phase 1 steps 4 and 5, 2026-05-25)**, full writeup in `notes/mcp-spike.md`:
   - `mcp.orth.sh` is a real MCP gateway that accepts bearer auth (bail condition 2 cleared) and responds to direct JSON-RPC POST / in 228ms with `protocolVersion 2024-11-05`.
   - **`@ai-sdk/mcp@1.0.43` `createMCPClient` over SSE hangs**; the handshake never completes within 15 seconds. The SSE wire-level handshake works (curl confirms `event: endpoint\ndata: /message?sessionId=...`), but AI SDK's client cannot drive the older 2024-11-05 SSE transport pattern this server speaks. Bail condition 1 hit.
@@ -73,9 +80,9 @@ None. Both API keys received and verified. Tomba `/v1/email-verifier` call succe
 ## Session Continuity
 
 Last session: 2026-05-25
-Stopped at: Phase 3 complete. Neon + Upstash both live, schema migrated, single-flight verified.
-Next action: Phase 4 step 15, write `/api/chat/route.ts` with `streamText` against Sonnet 4.6, the typed Orthogonal tools, and basic message persistence. Step 16 verifies via curl. AI SDK 6 may differ from spec §8 snippet (which references v5); flagged for verification during step 15.
-Resume file: `.paul/PROJECT.md` + `SPEC.md` §5 (request lifecycle), §8 (LLM config), §9.5 (route handler), §13 step 15 to 16.
+Stopped at: Phase 4 complete. End-to-end chat loop verified end-to-end via curl. Two harness env collisions surfaced and fixed.
+Next action: Phase 5 step 17, implement content addressing: ensure tool_calls.output stores the full payload (already true), expose `read_tool_result` tool for the model to drill into stored payloads via JSONPath. Eight Phase 5 steps total cover content addressing, structured memory, manifest, sliding window, Haiku eviction, rolling cache breakpoints. End-of-phase sanity check: cache hits non-zero by turn 3, cross-conversation cache hit on second hero-prompt run from a fresh conversationId.
+Resume file: `.paul/PROJECT.md` + `SPEC.md` §7 (full context engineering spec) + §13 (steps 17 through 24).
 
 ---
 *STATE.md, updated after every significant action.*
