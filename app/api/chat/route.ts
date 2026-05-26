@@ -5,6 +5,7 @@ import { orthogonalTools } from "@/lib/orthogonal/tools.generated";
 import { memory_read, memory_write, read_tool_result } from "@/lib/orthogonal/context-tools";
 import { runWithRequestContext } from "@/lib/orthogonal/context";
 import { buildModelMessages } from "@/lib/build-model-messages";
+import { maybeTriggerEviction } from "@/lib/eviction";
 import {
   createPendingAssistantMessage,
   ensureConversation,
@@ -71,6 +72,9 @@ export async function POST(req: Request) {
             cachedInputTokens: totalUsage.cachedInputTokens,
           },
         });
+        maybeTriggerEviction(conversationId).catch((err) =>
+          console.error("eviction job failed:", err instanceof Error ? err.message : err),
+        );
       },
     });
   });
