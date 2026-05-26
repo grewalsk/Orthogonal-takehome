@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
+import { MessageList } from "@/components/message-list";
 
 interface Props {
   conversationId: string;
@@ -34,22 +35,7 @@ export function ChatClient({ conversationId, initialMessages }: Props) {
       </header>
 
       <main className="flex-1 overflow-y-auto px-4 py-6">
-        {messages.length === 0 ? (
-          <div className="mt-12 text-center text-sm text-zinc-500">
-            Ask a research question. The assistant has access to Apollo, Hunter, Tomba, LinkUp, and Olostep.
-          </div>
-        ) : (
-          <ol className="space-y-4">
-            {messages.map((m) => (
-              <li key={m.id} className="rounded border border-zinc-200 p-3 text-sm dark:border-zinc-800">
-                <div className="mb-1 text-xs font-medium uppercase tracking-wide text-zinc-500">{m.role}</div>
-                <pre className="overflow-x-auto whitespace-pre-wrap text-xs text-zinc-700 dark:text-zinc-300">
-                  {JSON.stringify(m.parts, null, 2)}
-                </pre>
-              </li>
-            ))}
-          </ol>
-        )}
+        <MessageList messages={messages} />
         {error ? (
           <div className="mt-4 rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-900">
             {error.message}

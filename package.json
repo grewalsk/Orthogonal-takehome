@@ -19,6 +19,7 @@
     "@ai-sdk/mcp": "^1.0.43",
     "@ai-sdk/react": "^3.0.193",
     "@neondatabase/serverless": "^1.1.0",
+    "@shikijs/rehype": "^4.1.0",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.0",
     "ai": "^6.0.191",
@@ -36,6 +37,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@tailwindcss/typography": "^0.5.19",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
