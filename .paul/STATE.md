@@ -6,25 +6,24 @@ See: `.paul/PROJECT.md` (updated 2026-05-25)
 Canonical spec: `SPEC.md` at repo root.
 
 **Core value:** Real-data research chat with a context engineering layer that keeps per-turn input cost roughly flat as the conversation grows.
-**Current focus:** Phases 1 through 6 complete. UI ships with structured cards, cost meter, eviction marker, dark mode toggle, error boundary, mobile responsive. Ready for Phase 7 (measurement + deployment).
+**Current focus:** All 7 phases complete. Build SHIPPED. Live at https://orthogonal-chat.vercel.app. Repo public at https://github.com/grewalsk/Orthogonal-takehome.
 
 ## Current Position
 
-Milestone: v0.1 Take-Home Submission
-Phase: 6 of 7 (Frontend) COMPLETE. Next: Phase 7.
-Plan: None yet (proceeding directly per the build agreement in conversation)
-Status: End-to-end UI verified. / -> 307 -> /c/<uuid>. /c/[id] renders 21KB HTML with full chat layout. POST /api/chat streams SSE with tool projections and text deltas. /api/conversation/[id]/cost returns the breakdown panel data.
-Last activity: 2026-05-25, Phase 6 step 30 + sanity check. Tomba round-trip on the deployed-locally UI returned deliverable/99, cost meter showed orth_cents=0 (cache hit, $0.01 saved) + 4c LLM.
+Milestone: v0.1 Take-Home Submission COMPLETE.
+Plan: None (build agreement followed end-to-end).
+Status: All 35 steps from SPEC.md section 13 shipped. Deployed to Vercel with all 5 env vars in Production. SSO protection disabled so reviewers can hit the URL directly. README leads with Context Engineering and includes measured numbers. Repo public; no invitations needed.
+Last activity: 2026-05-26, Phase 7 step 34 README. Production URL verified end-to-end with a real Tomba turn (HTTP 200, SSE flow, Anthropic cache_read=3774, Orthogonal cache_hit=true, $0.04 turn cost).
 
 Progress:
-- Milestone: [▓▓▓▓▓▓▓▓▓░] ~86% (6 of 7 phases)
+- Milestone: [▓▓▓▓▓▓▓▓▓▓] 100% (7 of 7 phases)
 - Phase 1: [▓▓▓▓▓▓▓▓▓▓] 100% (5 of 5 steps)
 - Phase 2: [▓▓▓▓▓▓▓▓▓▓] 100% (5 of 5 steps)
 - Phase 3: [▓▓▓▓▓▓▓▓▓▓] 100% (4 of 4 steps)
 - Phase 4: [▓▓▓▓▓▓▓▓▓▓] 100% (2 of 2 steps)
 - Phase 5: [▓▓▓▓▓▓▓▓▓▓] 100% (8 of 8 steps)
 - Phase 6: [▓▓▓▓▓▓▓▓▓▓] 100% (6 of 6 steps)
-- Phase 7: [░░░░░░░░░░] 0% (0 of 5 steps)
+- Phase 7: [▓▓▓▓▓▓▓▓▓▓] 100% (5 of 5 steps)
 
 ## Loop Position
 
@@ -81,10 +80,10 @@ None. Both API keys received and verified. Tomba `/v1/email-verifier` call succe
 
 ## Session Continuity
 
-Last session: 2026-05-25
-Stopped at: Phase 6 complete. UI ships. Multi-turn round trip works through real UI surface.
-Next action: Phase 7 step 31, run the hero conversation and a longer stress conversation, collect metrics from /api/conversation/[id]/cost for each. Then step 32 deploy to Vercel (need Vercel project, env vars). Step 33 verify deployed instance with hero prompt. Step 34 write README leading with context engineering + measured numbers. Step 35 invite christianpickettcode and berasogut and submit.
-Resume file: `.paul/PROJECT.md` + `SPEC.md` §12 (telemetry + measured metrics) + §13 (steps 31 through 35).
+Last session: 2026-05-26
+Stopped at: Build shipped. v0.1 Take-Home Submission milestone complete.
+Next action: None. Repo public at https://github.com/grewalsk/Orthogonal-takehome, live at https://orthogonal-chat.vercel.app. README.md is the user-facing doc; this STATE.md is the build audit log.
+Resume file: README.md (live numbers), notes/measurements.json (raw data), and SPEC.md (original brief).
 
 ---
 *STATE.md, updated after every significant action.*
