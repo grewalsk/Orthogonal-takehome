@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { wrapUntrusted } from "@/lib/orthogonal/safety";
 
 export const inputSchema = z.object({
   q: z.string().min(1).describe("Search query"),
@@ -37,20 +38,23 @@ export function project(raw: unknown, result_id: string, price_usd: number): Pro
   const list = Array.isArray(r?.results) ? r.results : Array.isArray(r?.sources) ? r.sources : [];
   const trimmed = list.slice(0, 10).map((item) => {
     const it = item as Record<string, unknown>;
+    const url = (it.url as string | undefined) ?? null;
+    const rawSnippet = snippetOf((it.content as string | undefined) ?? (it.snippet as string | undefined) ?? null);
     return {
       type: (it.type as string | undefined) ?? null,
       title: (it.name as string | undefined) ?? (it.title as string | undefined) ?? null,
-      url: (it.url as string | undefined) ?? null,
-      snippet: snippetOf((it.content as string | undefined) ?? (it.snippet as string | undefined) ?? null),
+      url,
+      snippet: rawSnippet ? wrapUntrusted(rawSnippet, "linkup.search", url ?? undefined) : null,
     };
   });
+  const rawAnswer = (r?.answer as string | undefined) ?? null;
   return {
     result_id,
     endpoint: "linkup /search",
     summary: {
       query: (r?.query as string | undefined) ?? null,
       output_type: (r?.output_type as string | undefined) ?? null,
-      answer: (r?.answer as string | undefined) ?? null,
+      answer: rawAnswer ? wrapUntrusted(rawAnswer, "linkup.search") : null,
       count: trimmed.length,
       results: trimmed,
     },

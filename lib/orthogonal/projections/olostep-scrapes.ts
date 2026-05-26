@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { wrapUntrusted } from "@/lib/orthogonal/safety";
 
 export const inputSchema = z.object({
   url_to_scrape: z.string().url().describe("URL to scrape"),
@@ -36,16 +37,20 @@ export function project(raw: unknown, result_id: string, price_usd: number): Pro
     (result?.text as string | undefined) ?? null;
   const md = (result?.markdown_content as string | undefined) ??
     (result?.markdown as string | undefined) ?? null;
-  const excerpt = text
+  const url = (metadata.url as string | undefined) ??
+    (result?.url_to_scrape as string | undefined) ??
+    (r?.url as string | undefined) ?? null;
+  const rawExcerpt = text
     ? text.replace(/\s+/g, " ").trim().slice(0, 300) + (text.length > 300 ? "..." : "")
+    : null;
+  const excerpt = rawExcerpt
+    ? wrapUntrusted(rawExcerpt, "olostep.scrape", url ?? undefined)
     : null;
   return {
     result_id,
     endpoint: "olostep /v1/scrapes",
     summary: {
-      url: (metadata.url as string | undefined) ??
-        (result?.url_to_scrape as string | undefined) ??
-        (r?.url as string | undefined) ?? null,
+      url,
       title: (metadata.title as string | undefined) ?? null,
       status: (result?.status as string | undefined) ??
         (r?.status as string | undefined) ?? null,
