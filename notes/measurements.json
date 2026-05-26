@@ -1,0 +1,322 @@
+{
+  "generatedAt": "2026-05-26T03:24:02.092Z",
+  "elapsedMs": 98908,
+  "hero": {
+    "conversationId": "e7d5d76a-6f4f-4486-a594-f3713258bb37",
+    "label": "hero-single-turn",
+    "turnCount": 1,
+    "cost": {
+      "conversationId": "e7d5d76a-6f4f-4486-a594-f3713258bb37",
+      "llmCents": 23,
+      "orthCents": 2,
+      "totalCents": 25,
+      "breakdown": {
+        "llm": {
+          "cents": 23,
+          "inputTokens": 53404,
+          "outputTokens": 1827,
+          "cacheReadTokens": 36045,
+          "cacheWriteTokens": 7763
+        },
+        "orthogonal": {
+          "billedCents": 2,
+          "wouldHaveBilledCents": 2,
+          "savingsCents": 0,
+          "toolCalls": 7,
+          "cacheHits": 0
+        }
+      }
+    },
+    "turns": [
+      {
+        "n": 0,
+        "role": "user",
+        "inputTokens": null,
+        "outputTokens": null,
+        "cacheReadTokens": null,
+        "cacheWriteTokens": null,
+        "costCents": 0,
+        "evicted": false
+      },
+      {
+        "n": 1,
+        "role": "assistant",
+        "inputTokens": 53404,
+        "outputTokens": 1827,
+        "cacheReadTokens": 36045,
+        "cacheWriteTokens": 7763,
+        "costCents": 23,
+        "evicted": false
+      }
+    ],
+    "toolCalls": [
+      {
+        "id": "tr_ba6fa9d4",
+        "tool": "apollo_mixed_people_search",
+        "status": "success",
+        "priceCents": 0,
+        "cacheHit": false
+      },
+      {
+        "id": "tr_1409b18b",
+        "tool": "apollo_organizations_enrich",
+        "status": "success",
+        "priceCents": 1,
+        "cacheHit": false
+      },
+      {
+        "id": "tr_186704d1",
+        "tool": "hunter_email_finder",
+        "status": "success",
+        "priceCents": 1,
+        "cacheHit": false
+      },
+      {
+        "id": "tr_63c88654",
+        "tool": "apollo_mixed_people_search",
+        "status": "success",
+        "priceCents": 0,
+        "cacheHit": false
+      },
+      {
+        "id": "tr_69083cd3",
+        "tool": "apollo_mixed_people_search",
+        "status": "success",
+        "priceCents": 0,
+        "cacheHit": false
+      },
+      {
+        "id": "tr_3f754567",
+        "tool": "apollo_mixed_people_search",
+        "status": "success",
+        "priceCents": 0,
+        "cacheHit": false
+      },
+      {
+        "id": "tr_f97d7bcf",
+        "tool": "apollo_mixed_people_search",
+        "status": "success",
+        "priceCents": 0,
+        "cacheHit": false
+      }
+    ],
+    "manifestEntries": 7,
+    "memoryKeys": []
+  },
+  "stress": {
+    "conversationId": "9d4106d3-f618-4e6d-b647-fbda437f34a2",
+    "label": "stress-six-turn-with-eviction",
+    "turnCount": 5,
+    "cost": {
+      "conversationId": "9d4106d3-f618-4e6d-b647-fbda437f34a2",
+      "llmCents": 36,
+      "orthCents": 3,
+      "totalCents": 39,
+      "breakdown": {
+        "llm": {
+          "cents": 36,
+          "inputTokens": 87394,
+          "outputTokens": 1671,
+          "cacheReadTokens": 61767,
+          "cacheWriteTokens": 14529
+        },
+        "orthogonal": {
+          "billedCents": 3,
+          "wouldHaveBilledCents": 4,
+          "savingsCents": 1,
+          "toolCalls": 4,
+          "cacheHits": 1
+        }
+      }
+    },
+    "turns": [
+      {
+        "n": 0,
+        "role": "user",
+        "inputTokens": null,
+        "outputTokens": null,
+        "cacheReadTokens": null,
+        "cacheWriteTokens": null,
+        "costCents": 0,
+        "evicted": false
+      },
+      {
+        "n": 1,
+        "role": "assistant",
+        "inputTokens": 14157,
+        "outputTokens": 575,
+        "cacheReadTokens": 11322,
+        "cacheWriteTokens": 710,
+        "costCents": 6,
+        "evicted": true
+      },
+      {
+        "n": 2,
+        "role": "user",
+        "inputTokens": null,
+        "outputTokens": null,
+        "cacheReadTokens": null,
+        "cacheWriteTokens": null,
+        "costCents": 0,
+        "evicted": true
+      },
+      {
+        "n": 3,
+        "role": "assistant",
+        "inputTokens": 11764,
+        "outputTokens": 215,
+        "cacheReadTokens": 7548,
+        "cacheWriteTokens": 1974,
+        "costCents": 5,
+        "evicted": true
+      },
+      {
+        "n": 4,
+        "role": "user",
+        "inputTokens": null,
+        "outputTokens": null,
+        "cacheReadTokens": null,
+        "cacheWriteTokens": null,
+        "costCents": 0,
+        "evicted": true
+      },
+      {
+        "n": 5,
+        "role": "assistant",
+        "inputTokens": 12653,
+        "outputTokens": 234,
+        "cacheReadTokens": 7548,
+        "cacheWriteTokens": 2512,
+        "costCents": 5,
+        "evicted": true
+      },
+      {
+        "n": 6,
+        "role": "user",
+        "inputTokens": null,
+        "outputTokens": null,
+        "cacheReadTokens": null,
+        "cacheWriteTokens": null,
+        "costCents": 0,
+        "evicted": true
+      },
+      {
+        "n": 7,
+        "role": "assistant",
+        "inputTokens": 41480,
+        "outputTokens": 458,
+        "cacheReadTokens": 31575,
+        "cacheWriteTokens": 6379,
+        "costCents": 16,
+        "evicted": true
+      },
+      {
+        "n": 8,
+        "role": "user",
+        "inputTokens": null,
+        "outputTokens": null,
+        "cacheReadTokens": null,
+        "cacheWriteTokens": null,
+        "costCents": 0,
+        "evicted": false
+      },
+      {
+        "n": 9,
+        "role": "assistant",
+        "inputTokens": 7340,
+        "outputTokens": 189,
+        "cacheReadTokens": 3774,
+        "cacheWriteTokens": 2954,
+        "costCents": 4,
+        "evicted": false
+      }
+    ],
+    "toolCalls": [
+      {
+        "id": "tr_2ff28fc2",
+        "tool": "hunter_companies_find",
+        "status": "success",
+        "priceCents": 1,
+        "cacheHit": false
+      },
+      {
+        "id": "tr_4c3907cb",
+        "tool": "apollo_organizations_enrich",
+        "status": "success",
+        "priceCents": 1,
+        "cacheHit": false
+      },
+      {
+        "id": "tr_6bd55973",
+        "tool": "hunter_companies_find",
+        "status": "success",
+        "priceCents": 1,
+        "cacheHit": false
+      },
+      {
+        "id": "tr_86ecb033",
+        "tool": "tomba_email_verifier",
+        "status": "cache_hit",
+        "priceCents": 1,
+        "cacheHit": true
+      }
+    ],
+    "manifestEntries": 4,
+    "memoryKeys": [
+      "stripe.name",
+      "stripe.domain",
+      "anthropic.name",
+      "stripe.industry",
+      "stripe.sic_code",
+      "anthropic.domain",
+      "stripe.gics_code",
+      "anthropic.mission",
+      "stripe.naics_code",
+      "user.request.task",
+      "anthropic.founders",
+      "anthropic.industry",
+      "stripe.description",
+      "stripe.founded_year",
+      "stripe.headquarters",
+      "stripe.linkedin_url",
+      "user.request.intent",
+      "vercel.support_email",
+      "anthropic.founded_year",
+      "anthropic.headquarters",
+      "anthropic.linkedin_url",
+      "stripe.industry_sector",
+      "anthropic.employee_count",
+      "anthropic.research_focus",
+      "anthropic.core_technology",
+      "anthropic.legal_structure",
+      "anthropic.major_investors",
+      "stripe.industry_subsector",
+      "anthropic.flagship_product",
+      "user.request.search_target",
+      "stripe.employee_count_range",
+      "anthropic.founder_background",
+      "hunter.domain_search_tool.error",
+      "anthropic.headquarters_alternate",
+      "hunter.domain_search_tool.status",
+      "hunter.domain_search_tool.issue_type",
+      "anthropic.flagship_product_description",
+      "vercel.support_email.verification.status",
+      "vercel.support_email.verification.webmail",
+      "vercel.support_email.verification.disposable",
+      "vercel.support_email.verification.smtp_provider",
+      "vercel.support_email.verification.deliverability",
+      "user.request.alternative_tools.hunter_email_finder",
+      "vercel.support_email.verification.confidence_score",
+      "user.request.alternative_tools.apollo_people_search",
+      "vercel.support_email.verification.accept_all_domain",
+      "vercel.support_email.verification.verification_tool"
+    ]
+  },
+  "evictionResult": {
+    "evicted": 7,
+    "factsExtracted": 48,
+    "cursorAt": "2026-05-26T03:23:29.993Z",
+    "totalTokensBefore": 3189,
+    "totalTokensAfter": 251
+  }
+}
