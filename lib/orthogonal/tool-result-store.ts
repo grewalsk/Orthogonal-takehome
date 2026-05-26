@@ -4,6 +4,7 @@ import { drizzle } from "drizzle-orm/neon-serverless";
 import { getPool } from "@/lib/db";
 import { canonicalJSON } from "@/lib/cache";
 import { requireRequestContext } from "@/lib/orthogonal/context";
+import { appendManifestEntry } from "@/lib/manifest";
 import { toolCalls } from "@/drizzle/schema";
 
 export interface ToolResultInput {
@@ -70,6 +71,14 @@ export async function storeToolResult(record: ToolResultInput): Promise<string> 
     cacheHit: record.cacheHit,
     startedAt: now,
     finishedAt: now,
+  });
+
+  await appendManifestEntry(ctx.conversationId, {
+    tool: record.slug,
+    input: record.input,
+    result_id: id,
+    price_cents: record.priceCents,
+    at: now.toISOString(),
   });
 
   return id;

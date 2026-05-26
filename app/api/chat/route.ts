@@ -1,9 +1,10 @@
-import { convertToModelMessages, stepCountIs, streamText, type UIMessage } from "ai";
+import { stepCountIs, streamText, type UIMessage } from "ai";
 import { mainModel } from "@/lib/llm";
 import { SYSTEM_PROMPT } from "@/lib/system-prompt";
 import { orthogonalTools } from "@/lib/orthogonal/tools.generated";
 import { memory_read, memory_write, read_tool_result } from "@/lib/orthogonal/context-tools";
 import { runWithRequestContext } from "@/lib/orthogonal/context";
+import { buildModelMessages } from "@/lib/build-model-messages";
 import {
   createPendingAssistantMessage,
   ensureConversation,
@@ -42,7 +43,7 @@ export async function POST(req: Request) {
 
   const assistantMessageId = await createPendingAssistantMessage(conversationId, "claude-sonnet-4-6");
 
-  const modelMessages = await convertToModelMessages(uiMessages);
+  const modelMessages = await buildModelMessages(conversationId, uiMessages);
 
   return runWithRequestContext({ conversationId, messageId: assistantMessageId }, async () => {
     const result = streamText({
