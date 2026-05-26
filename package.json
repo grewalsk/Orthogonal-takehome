@@ -9,7 +9,10 @@
     "lint": "eslint",
     "probe": "tsx scripts/probe.ts",
     "mcp-spike": "tsx scripts/mcp-spike.ts",
-    "snapshot": "tsx scripts/snapshot-catalog.ts"
+    "snapshot": "tsx scripts/snapshot-catalog.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx scripts/db-migrate.ts",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.79",
