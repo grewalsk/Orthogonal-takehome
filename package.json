@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "probe": "tsx scripts/probe.ts",
-    "mcp-spike": "tsx scripts/mcp-spike.ts"
+    "mcp-spike": "tsx scripts/mcp-spike.ts",
+    "snapshot": "tsx scripts/snapshot-catalog.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.79",
