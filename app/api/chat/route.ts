@@ -1,6 +1,5 @@
 import { stepCountIs, streamText, type UIMessage } from "ai";
 import { mainModel } from "@/lib/llm";
-import { SYSTEM_PROMPT } from "@/lib/system-prompt";
 import { orthogonalTools } from "@/lib/orthogonal/tools.generated";
 import { memory_read, memory_write, read_tool_result } from "@/lib/orthogonal/context-tools";
 import { runWithRequestContext } from "@/lib/orthogonal/context";
@@ -49,7 +48,6 @@ export async function POST(req: Request) {
   return runWithRequestContext({ conversationId, messageId: assistantMessageId }, async () => {
     const result = streamText({
       model: mainModel,
-      system: SYSTEM_PROMPT,
       messages: modelMessages,
       tools: { ...orthogonalTools, read_tool_result, memory_write, memory_read },
       stopWhen: stepCountIs(8),

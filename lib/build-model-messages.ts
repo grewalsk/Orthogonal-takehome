@@ -5,6 +5,7 @@ import { getPool } from "@/lib/db";
 import { conversations, messages } from "@/drizzle/schema";
 import { loadManifest, renderManifest } from "@/lib/manifest";
 import { readMemorySnapshot, type MemoryValue } from "@/lib/memory";
+import { SYSTEM_PROMPT } from "@/lib/system-prompt";
 
 let activeDb: ReturnType<typeof drizzle> | null = null;
 function getDb(): ReturnType<typeof drizzle> {
@@ -23,19 +24,34 @@ export async function buildModelMessages(
     convertToModelMessages(hot),
   ]);
 
-  const systemBlocks: ModelMessage[] = [];
+  // Anchor breakpoint A on the system prompt. Caches tool defs + system
+  // every turn. SPEC.md section 7.4 calls for a second rolling breakpoint
+  // at the end of the conversation history, but per-turn changes in the
+  // manifest and memory blocks (which sit between system and history)
+  // would invalidate that cache key. Single anchor here is the reliable
+  // win. Deferred-work note: re-order blocks (manifest + memory AFTER
+  // history) to make a rolling B viable.
+  const systemMessage: ModelMessage = {
+    role: "system",
+    content: SYSTEM_PROMPT,
+    providerOptions: {
+      anthropic: { cacheControl: { type: "ephemeral" } },
+    },
+  };
+
+  const dynamicBlocks: ModelMessage[] = [];
 
   const manifestText = renderManifest(manifest);
   if (manifestText) {
-    systemBlocks.push({ role: "system", content: manifestText });
+    dynamicBlocks.push({ role: "system", content: manifestText });
   }
 
   const memoryText = renderMemorySnapshot(memory);
   if (memoryText) {
-    systemBlocks.push({ role: "system", content: memoryText });
+    dynamicBlocks.push({ role: "system", content: memoryText });
   }
 
-  return [...systemBlocks, ...baseMessages];
+  return [systemMessage, ...dynamicBlocks, ...baseMessages];
 }
 
 async function filterHotWindow(
