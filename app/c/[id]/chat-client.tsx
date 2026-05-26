@@ -1,22 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
 import { MessageList } from "@/components/message-list";
+import { CostMeter } from "@/components/cost-meter";
+import { EvictionMarker } from "@/components/eviction-marker";
 
 interface Props {
   conversationId: string;
   initialMessages: UIMessage[];
+  evictedCount: number;
+  memory: Record<string, unknown>;
 }
 
-export function ChatClient({ conversationId, initialMessages }: Props) {
+export function ChatClient({ conversationId, initialMessages, evictedCount, memory }: Props) {
   const [input, setInput] = useState("");
+  const [costRefresh, setCostRefresh] = useState(0);
+  const lastStatusRef = useRef<string | null>(null);
+
   const { messages, sendMessage, status, error } = useChat({
     id: conversationId,
     messages: initialMessages,
     experimental_throttle: 100,
   });
+
+  useEffect(() => {
+    if (lastStatusRef.current === "streaming" && status === "ready") {
+      setCostRefresh((n) => n + 1);
+    }
+    lastStatusRef.current = status;
+  }, [status]);
 
   const busy = status === "submitted" || status === "streaming";
 
@@ -30,11 +44,14 @@ export function ChatClient({ conversationId, initialMessages }: Props) {
 
   return (
     <div className="mx-auto flex h-dvh max-w-3xl flex-col">
+      <CostMeter conversationId={conversationId} refreshKey={costRefresh} />
+
       <header className="border-b border-zinc-200 px-4 py-3 text-sm text-zinc-500 dark:border-zinc-800">
         <div className="font-mono">conv {conversationId.slice(0, 8)}</div>
       </header>
 
       <main className="flex-1 overflow-y-auto px-4 py-6">
+        {evictedCount > 0 && <EvictionMarker evictedCount={evictedCount} memory={memory} />}
         <MessageList messages={messages} />
         {error ? (
           <div className="mt-4 rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-900">
