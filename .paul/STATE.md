@@ -6,24 +6,25 @@ See: `.paul/PROJECT.md` (updated 2026-05-25)
 Canonical spec: `SPEC.md` at repo root.
 
 **Core value:** Real-data research chat with a context engineering layer that keeps per-turn input cost roughly flat as the conversation grows.
-**Current focus:** Phases 1 through 5 complete. The central technical contribution (4 context primitives) is verified end-to-end. Ready for Phase 6 (frontend, steps 25 through 30).
+**Current focus:** Phases 1 through 6 complete. UI ships with structured cards, cost meter, eviction marker, dark mode toggle, error boundary, mobile responsive. Ready for Phase 7 (measurement + deployment).
 
 ## Current Position
 
 Milestone: v0.1 Take-Home Submission
-Phase: 5 of 7 (Context engineering) COMPLETE. Next: Phase 6.
+Phase: 6 of 7 (Frontend) COMPLETE. Next: Phase 7.
 Plan: None yet (proceeding directly per the build agreement in conversation)
-Status: All 4 context primitives wired and verified end to end. Anchor cache breakpoint hits 91% of input tokens by turn 2 (3774/4125). Cross-conversation Redis cache returns cache_hit=true for identical Tomba calls across separate conversations. Haiku extraction pulls 7 hierarchical facts from a 4-turn synthesized conversation.
-Last activity: 2026-05-25, Phase 5 step 24 verified. Two fresh conversations both serve Tomba results from Redis cache. Zero /v1/run traffic for repeated calls.
+Status: End-to-end UI verified. / -> 307 -> /c/<uuid>. /c/[id] renders 21KB HTML with full chat layout. POST /api/chat streams SSE with tool projections and text deltas. /api/conversation/[id]/cost returns the breakdown panel data.
+Last activity: 2026-05-25, Phase 6 step 30 + sanity check. Tomba round-trip on the deployed-locally UI returned deliverable/99, cost meter showed orth_cents=0 (cache hit, $0.01 saved) + 4c LLM.
 
 Progress:
-- Milestone: [▓▓▓▓▓▓▓░░░] ~71% (5 of 7 phases)
+- Milestone: [▓▓▓▓▓▓▓▓▓░] ~86% (6 of 7 phases)
 - Phase 1: [▓▓▓▓▓▓▓▓▓▓] 100% (5 of 5 steps)
 - Phase 2: [▓▓▓▓▓▓▓▓▓▓] 100% (5 of 5 steps)
 - Phase 3: [▓▓▓▓▓▓▓▓▓▓] 100% (4 of 4 steps)
 - Phase 4: [▓▓▓▓▓▓▓▓▓▓] 100% (2 of 2 steps)
 - Phase 5: [▓▓▓▓▓▓▓▓▓▓] 100% (8 of 8 steps)
-- Phase 6: [░░░░░░░░░░] 0% (0 of 6 steps)
+- Phase 6: [▓▓▓▓▓▓▓▓▓▓] 100% (6 of 6 steps)
+- Phase 7: [░░░░░░░░░░] 0% (0 of 5 steps)
 
 ## Loop Position
 
