@@ -67,7 +67,8 @@ export async function POST(req: Request) {
           usage: {
             inputTokens: totalUsage.inputTokens,
             outputTokens: totalUsage.outputTokens,
-            cachedInputTokens: totalUsage.cachedInputTokens,
+            cachedInputTokens: totalUsage.inputTokenDetails?.cacheReadTokens,
+            cacheCreationInputTokens: totalUsage.inputTokenDetails?.cacheWriteTokens,
           },
         });
         maybeTriggerEviction(conversationId).catch((err) =>
