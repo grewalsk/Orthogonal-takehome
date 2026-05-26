@@ -1,0 +1,47 @@
+[
+  {
+    "api": "apollo",
+    "path": "/api/v1/organizations/enrich",
+    "slug": "apollo_organizations_enrich"
+  },
+  {
+    "api": "apollo",
+    "path": "/api/v1/people/match",
+    "slug": "apollo_people_match"
+  },
+  {
+    "api": "apollo",
+    "path": "/api/v1/mixed_people/api_search",
+    "slug": "apollo_mixed_people_search"
+  },
+  {
+    "api": "hunter",
+    "path": "/v2/domain-search",
+    "slug": "hunter_domain_search"
+  },
+  {
+    "api": "hunter",
+    "path": "/v2/email-finder",
+    "slug": "hunter_email_finder"
+  },
+  {
+    "api": "hunter",
+    "path": "/v2/companies/find",
+    "slug": "hunter_companies_find"
+  },
+  {
+    "api": "tomba",
+    "path": "/v1/email-verifier",
+    "slug": "tomba_email_verifier"
+  },
+  {
+    "api": "linkup",
+    "path": "/search",
+    "slug": "linkup_search"
+  },
+  {
+    "api": "olostep",
+    "path": "/v1/scrapes",
+    "slug": "olostep_scrapes"
+  }
+]
