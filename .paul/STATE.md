@@ -6,20 +6,21 @@ See: `.paul/PROJECT.md` (updated 2026-05-25)
 Canonical spec: `SPEC.md` at repo root.
 
 **Core value:** Real-data research chat with a context engineering layer that keeps per-turn input cost roughly flat as the conversation grows.
-**Current focus:** Phase 1 complete (steps 1 through 5). Ready for Phase 2 (catalog and integration layer, steps 6 through 10).
+**Current focus:** Phases 1 and 2 complete. Ready for Phase 3 (persistence and infrastructure, steps 11 through 14).
 
 ## Current Position
 
 Milestone: v0.1 Take-Home Submission
-Phase: 1 of 7 (Bootstrap and verification) COMPLETE. Next: Phase 2.
+Phase: 2 of 7 (Catalog and integration layer) COMPLETE. Next: Phase 3.
 Plan: None yet (proceeding directly per the build agreement in conversation)
-Status: All 5 Phase 1 steps complete. REST vs MCP locked: REST.
-Last activity: 2026-05-25, MCP spike against `mcp.orth.sh` documented in `notes/mcp-spike.md`. `createMCPClient` SSE transport hangs (bail condition 1 hit). Direct JSON-RPC POST / works in 228ms, confirming MCP is server-side viable but not client-compatible via AI SDK 6.
+Status: Typed tool palette compiles. Tomba projection validated against real upstream payload from probe (deliverable, score 99). Other 8 projections unverified until Phase 4 end-to-end.
+Last activity: 2026-05-25, Phase 2 step 10. lib/orthogonal/tools.generated.ts written with 9 tools all using a shared executeTool() helper that wires inputSchema -> callOrth -> storeToolResult -> project. Hand-written rather than script-generated (mechanical structure, 9 entries, no domain logic to justify generator).
 
 Progress:
-- Milestone: [▓▓░░░░░░░░] ~14% (1 of 7 phases)
+- Milestone: [▓▓▓░░░░░░░] ~29% (2 of 7 phases)
 - Phase 1: [▓▓▓▓▓▓▓▓▓▓] 100% (5 of 5 steps)
-- Phase 2: [░░░░░░░░░░] 0% (0 of 5 steps)
+- Phase 2: [▓▓▓▓▓▓▓▓▓▓] 100% (5 of 5 steps)
+- Phase 3: [░░░░░░░░░░] 0% (0 of 4 steps)
 
 ## Loop Position
 
@@ -71,9 +72,9 @@ None. Both API keys received and verified. Tomba `/v1/email-verifier` call succe
 ## Session Continuity
 
 Last session: 2026-05-25
-Stopped at: Phase 1 complete. All 5 steps done. REST locked. Paused for user "go" before Phase 2.
-Next action: Phase 2 step 6, write `scripts/snapshot-catalog.ts` to enumerate the 807-endpoint catalog via `/v1/list-endpoints` + per-endpoint `/v1/details`, filter to the curated 8 to 12 endpoints defined in `scripts/curated-endpoints.json`, and emit `lib/orthogonal/catalog.generated.ts`. Per spec §6.2.
-Resume file: `.paul/PROJECT.md` + `SPEC.md` §13 + the curated-endpoint thinking in `notes/probe-output.json`.
+Stopped at: Phase 2 complete. Snapshot script, curated set, 9 projections, client wrapper, and tools.generated.ts all in. Tomba sanity check passed.
+Next action: Phase 3 step 11, stand up Neon Postgres. User will need to provision a Neon project and provide `DATABASE_URL` for `.env.local`. Then step 12 (Drizzle schema from `SPEC.md` §9.3), step 13 (Upstash Redis credentials), step 14 (real `withSingleFlight` + `storeToolResult`/`loadToolResult` replacements).
+Resume file: `.paul/PROJECT.md` + `SPEC.md` §9 (full data layer spec) + §13 (steps 11 through 14).
 
 ---
 *STATE.md, updated after every significant action.*
