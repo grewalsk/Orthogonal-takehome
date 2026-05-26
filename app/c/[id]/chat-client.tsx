@@ -6,6 +6,7 @@ import type { UIMessage } from "ai";
 import { MessageList } from "@/components/message-list";
 import { CostMeter } from "@/components/cost-meter";
 import { EvictionMarker } from "@/components/eviction-marker";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface Props {
   conversationId: string;
@@ -46,21 +47,23 @@ export function ChatClient({ conversationId, initialMessages, evictedCount, memo
     <div className="mx-auto flex h-dvh max-w-3xl flex-col">
       <CostMeter conversationId={conversationId} refreshKey={costRefresh} />
 
-      <header className="border-b border-zinc-200 px-4 py-3 text-sm text-zinc-500 dark:border-zinc-800">
+      <header className="flex items-center gap-3 border-b border-zinc-200 px-3 py-3 text-sm text-zinc-500 sm:px-4 dark:border-zinc-800">
         <div className="font-mono">conv {conversationId.slice(0, 8)}</div>
+        <div className="flex-1" />
+        <ThemeToggle />
       </header>
 
-      <main className="flex-1 overflow-y-auto px-4 py-6">
+      <main className="flex-1 overflow-y-auto px-3 py-6 sm:px-4">
         {evictedCount > 0 && <EvictionMarker evictedCount={evictedCount} memory={memory} />}
         <MessageList messages={messages} />
         {error ? (
-          <div className="mt-4 rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-900">
+          <div className="mt-4 rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-900 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
             {error.message}
           </div>
         ) : null}
       </main>
 
-      <form onSubmit={submit} className="border-t border-zinc-200 px-4 py-3 dark:border-zinc-800">
+      <form onSubmit={submit} className="border-t border-zinc-200 px-3 py-3 sm:px-4 dark:border-zinc-800">
         <div className="flex items-center gap-2">
           <input
             value={input}
