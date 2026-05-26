@@ -2,6 +2,7 @@ import { convertToModelMessages, stepCountIs, streamText, type UIMessage } from 
 import { mainModel } from "@/lib/llm";
 import { SYSTEM_PROMPT } from "@/lib/system-prompt";
 import { orthogonalTools } from "@/lib/orthogonal/tools.generated";
+import { read_tool_result } from "@/lib/orthogonal/context-tools";
 import { runWithRequestContext } from "@/lib/orthogonal/context";
 import {
   createPendingAssistantMessage,
@@ -48,7 +49,7 @@ export async function POST(req: Request) {
       model: mainModel,
       system: SYSTEM_PROMPT,
       messages: modelMessages,
-      tools: orthogonalTools,
+      tools: { ...orthogonalTools, read_tool_result },
       stopWhen: stepCountIs(8),
       experimental_telemetry: { isEnabled: true },
     });
