@@ -7,10 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "probe": "tsx scripts/probe.ts"
+    "probe": "tsx scripts/probe.ts",
+    "mcp-spike": "tsx scripts/mcp-spike.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.79",
+    "@ai-sdk/mcp": "^1.0.43",
     "@ai-sdk/react": "^3.0.193",
     "@neondatabase/serverless": "^1.1.0",
     "@upstash/ratelimit": "^2.0.8",

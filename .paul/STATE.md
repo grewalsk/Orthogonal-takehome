@@ -6,19 +6,20 @@ See: `.paul/PROJECT.md` (updated 2026-05-25)
 Canonical spec: `SPEC.md` at repo root.
 
 **Core value:** Real-data research chat with a context engineering layer that keeps per-turn input cost roughly flat as the conversation grows.
-**Current focus:** Phase 1 steps 1, 2, 3 complete. Ready for step 4 (MCP spike, hard cap 30 min).
+**Current focus:** Phase 1 complete (steps 1 through 5). Ready for Phase 2 (catalog and integration layer, steps 6 through 10).
 
 ## Current Position
 
 Milestone: v0.1 Take-Home Submission
-Phase: 1 of 7 (Bootstrap and verification)
+Phase: 1 of 7 (Bootstrap and verification) COMPLETE. Next: Phase 2.
 Plan: None yet (proceeding directly per the build agreement in conversation)
-Status: Steps 1, 2, 3 complete. Ready for step 4 (MCP spike).
-Last activity: 2026-05-25, probe verified `/v1/list-endpoints`, `/v1/details`, `/v1/integrate`, and one $0.01 Tomba `/v1/run`. Three spec deviations captured.
+Status: All 5 Phase 1 steps complete. REST vs MCP locked: REST.
+Last activity: 2026-05-25, MCP spike against `mcp.orth.sh` documented in `notes/mcp-spike.md`. `createMCPClient` SSE transport hangs (bail condition 1 hit). Direct JSON-RPC POST / works in 228ms, confirming MCP is server-side viable but not client-compatible via AI SDK 6.
 
 Progress:
-- Milestone: [▓░░░░░░░░░] ~10%
-- Phase 1: [▓▓▓▓▓▓░░░░] 60% (3 of 5 steps)
+- Milestone: [▓▓░░░░░░░░] ~14% (1 of 7 phases)
+- Phase 1: [▓▓▓▓▓▓▓▓▓▓] 100% (5 of 5 steps)
+- Phase 2: [░░░░░░░░░░] 0% (0 of 5 steps)
 
 ## Loop Position
 
@@ -50,6 +51,13 @@ Recorded in `.paul/PROJECT.md` Key Decisions table. Seven decisions locked from 
   - **`/v1/run` shape depends on upstream method.** GET endpoints with queryParams take `{api, path, query: {...}}`. POST endpoints with bodyParams take `{api, path, body: {...}}`. The `SPEC.md` §6.4 example uses `body` for Apollo (correct since Apollo people-match is POST) but does not generalize. `lib/orthogonal/client.ts` in Phase 2 step 9 must select the wrapper field per endpoint method. Confirmed via the `/v1/integrate` canonical SDK snippet.
   - **`@orth/sdk` exists.** The `/v1/integrate` response references `import Orthogonal from "@orth/sdk"`. Spec locks REST (§2 decision 1); not adopting the SDK, but flagging for awareness.
 
+- **MCP spike outcome (Phase 1 steps 4 and 5, 2026-05-25)**, full writeup in `notes/mcp-spike.md`:
+  - `mcp.orth.sh` is a real MCP gateway that accepts bearer auth (bail condition 2 cleared) and responds to direct JSON-RPC POST / in 228ms with `protocolVersion 2024-11-05`.
+  - **`@ai-sdk/mcp@1.0.43` `createMCPClient` over SSE hangs**; the handshake never completes within 15 seconds. The SSE wire-level handshake works (curl confirms `event: endpoint\ndata: /message?sessionId=...`), but AI SDK's client cannot drive the older 2024-11-05 SSE transport pattern this server speaks. Bail condition 1 hit.
+  - **Decision locked: REST.** `SPEC.md` §2 decision 1 stands. MCP migration moves to deferred work (post-submission).
+  - `@ai-sdk/mcp` left installed for potential future use; not imported in runtime code.
+  - **AI SDK 6 rename surfaced:** the function is `createMCPClient` (no `experimental_` prefix) and lives in `@ai-sdk/mcp`, not in the main `ai` package. `SPEC.md` §13 step 4 references `experimental_createMCPClient` (the v5 name). Noted; no code change needed since REST is locked.
+
 ### Deferred Issues
 
 - **`rehype-shiki` vs `@shikijs/rehype`** (Phase 6 step 26).
@@ -63,9 +71,9 @@ None. Both API keys received and verified. Tomba `/v1/email-verifier` call succe
 ## Session Continuity
 
 Last session: 2026-05-25
-Stopped at: Phase 1 steps 1, 2, 3 complete. Probe pushed, three deviations captured. Paused for user "go" before step 4.
-Next action: Phase 1 step 4, spike `mcp.orth.sh` with `experimental_createMCPClient` from AI SDK. Hard cap 30 min. Document outcome in `notes/mcp-spike.md`. Bail conditions: SSE chunks arriving out of order, or non-bearer auth flow.
-Resume file: `.paul/PROJECT.md` + `SPEC.md` §13 (steps 4 and 5 remain in Phase 1).
+Stopped at: Phase 1 complete. All 5 steps done. REST locked. Paused for user "go" before Phase 2.
+Next action: Phase 2 step 6, write `scripts/snapshot-catalog.ts` to enumerate the 807-endpoint catalog via `/v1/list-endpoints` + per-endpoint `/v1/details`, filter to the curated 8 to 12 endpoints defined in `scripts/curated-endpoints.json`, and emit `lib/orthogonal/catalog.generated.ts`. Per spec §6.2.
+Resume file: `.paul/PROJECT.md` + `SPEC.md` §13 + the curated-endpoint thinking in `notes/probe-output.json`.
 
 ---
 *STATE.md, updated after every significant action.*
