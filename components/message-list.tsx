@@ -2,6 +2,7 @@
 
 import type { UIMessage } from "ai";
 import { TextPart } from "@/components/text-part";
+import { ToolCallCard } from "@/components/tool-call-card";
 
 interface Props {
   messages: UIMessage[];
@@ -55,11 +56,7 @@ function PartRouter({ part, isUser }: { part: UIMessage["parts"][number]; isUser
     return null;
   }
   if (part.type.startsWith("tool-")) {
-    return (
-      <pre className="overflow-x-auto rounded bg-zinc-100 px-3 py-2 text-xs text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
-        {part.type}: {JSON.stringify(("output" in part ? part.output : part), null, 2).slice(0, 600)}
-      </pre>
-    );
+    return <ToolCallCard part={part as unknown as Parameters<typeof ToolCallCard>[0]["part"]} />;
   }
   return null;
 }
