@@ -6,23 +6,24 @@ See: `.paul/PROJECT.md` (updated 2026-05-25)
 Canonical spec: `SPEC.md` at repo root.
 
 **Core value:** Real-data research chat with a context engineering layer that keeps per-turn input cost roughly flat as the conversation grows.
-**Current focus:** Phases 1, 2, 3, 4 complete. Ready for Phase 5 (context engineering primitives, steps 17 through 24).
+**Current focus:** Phases 1 through 5 complete. The central technical contribution (4 context primitives) is verified end-to-end. Ready for Phase 6 (frontend, steps 25 through 30).
 
 ## Current Position
 
 Milestone: v0.1 Take-Home Submission
-Phase: 4 of 7 (Chat loop backend) COMPLETE. Next: Phase 5.
+Phase: 5 of 7 (Context engineering) COMPLETE. Next: Phase 6.
 Plan: None yet (proceeding directly per the build agreement in conversation)
-Status: End-to-end chat loop verified. Single curl POST to /api/chat with a "verify support@vercel.com" prompt streamed full SSE: start -> tool-input-delta -> tool-output-available (tomba projection, score 99) -> text-delta -> finish. Postgres persisted user + assistant rows and a tool_calls row with 4603-byte raw payload. Cost: 1c orthogonal + ~2c LLM = 3c total for the turn.
-Last activity: 2026-05-25, Phase 4 steps 15+16. Surfaced and fixed two harness env collisions (ANTHROPIC_BASE_URL without /v1, empty ANTHROPIC_API_KEY) via lib/env.ts force-override and explicit baseURL in createAnthropic. Switched default Node to 22 (Next.js 16 requires >=20.9).
+Status: All 4 context primitives wired and verified end to end. Anchor cache breakpoint hits 91% of input tokens by turn 2 (3774/4125). Cross-conversation Redis cache returns cache_hit=true for identical Tomba calls across separate conversations. Haiku extraction pulls 7 hierarchical facts from a 4-turn synthesized conversation.
+Last activity: 2026-05-25, Phase 5 step 24 verified. Two fresh conversations both serve Tomba results from Redis cache. Zero /v1/run traffic for repeated calls.
 
 Progress:
-- Milestone: [▓▓▓▓▓▓░░░░] ~57% (4 of 7 phases)
+- Milestone: [▓▓▓▓▓▓▓░░░] ~71% (5 of 7 phases)
 - Phase 1: [▓▓▓▓▓▓▓▓▓▓] 100% (5 of 5 steps)
 - Phase 2: [▓▓▓▓▓▓▓▓▓▓] 100% (5 of 5 steps)
 - Phase 3: [▓▓▓▓▓▓▓▓▓▓] 100% (4 of 4 steps)
 - Phase 4: [▓▓▓▓▓▓▓▓▓▓] 100% (2 of 2 steps)
-- Phase 5: [░░░░░░░░░░] 0% (0 of 8 steps)
+- Phase 5: [▓▓▓▓▓▓▓▓▓▓] 100% (8 of 8 steps)
+- Phase 6: [░░░░░░░░░░] 0% (0 of 6 steps)
 
 ## Loop Position
 
@@ -80,9 +81,9 @@ None. Both API keys received and verified. Tomba `/v1/email-verifier` call succe
 ## Session Continuity
 
 Last session: 2026-05-25
-Stopped at: Phase 4 complete. End-to-end chat loop verified end-to-end via curl. Two harness env collisions surfaced and fixed.
-Next action: Phase 5 step 17, implement content addressing: ensure tool_calls.output stores the full payload (already true), expose `read_tool_result` tool for the model to drill into stored payloads via JSONPath. Eight Phase 5 steps total cover content addressing, structured memory, manifest, sliding window, Haiku eviction, rolling cache breakpoints. End-of-phase sanity check: cache hits non-zero by turn 3, cross-conversation cache hit on second hero-prompt run from a fresh conversationId.
-Resume file: `.paul/PROJECT.md` + `SPEC.md` §7 (full context engineering spec) + §13 (steps 17 through 24).
+Stopped at: Phase 5 complete. The 4 context primitives are all live and verified. Sanity-check evidence in scripts/verify-cache.ts and scripts/verify-redis-cache.ts.
+Next action: Phase 6 step 25, build the frontend. useChat on `/c/[id]`, hydrate from Postgres on page load, MessageList + TextPart, ToolCallCard with streaming pill, three structured cards (Contact, Company, SearchResult), CostMeter, EvictionMarker, dark mode, mobile responsive, error retry.
+Resume file: `.paul/PROJECT.md` + `SPEC.md` §10 (UI/UX spec) + §13 (steps 25 through 30).
 
 ---
 *STATE.md, updated after every significant action.*
