@@ -82,9 +82,9 @@ None. Both API keys received and verified. Tomba `/v1/email-verifier` call succe
 ## Session Continuity
 
 Last session: 2026-05-25
-Stopped at: Phase 5 complete. The 4 context primitives are all live and verified. Sanity-check evidence in scripts/verify-cache.ts and scripts/verify-redis-cache.ts.
-Next action: Phase 6 step 25, build the frontend. useChat on `/c/[id]`, hydrate from Postgres on page load, MessageList + TextPart, ToolCallCard with streaming pill, three structured cards (Contact, Company, SearchResult), CostMeter, EvictionMarker, dark mode, mobile responsive, error retry.
-Resume file: `.paul/PROJECT.md` + `SPEC.md` §10 (UI/UX spec) + §13 (steps 25 through 30).
+Stopped at: Phase 6 complete. UI ships. Multi-turn round trip works through real UI surface.
+Next action: Phase 7 step 31, run the hero conversation and a longer stress conversation, collect metrics from /api/conversation/[id]/cost for each. Then step 32 deploy to Vercel (need Vercel project, env vars). Step 33 verify deployed instance with hero prompt. Step 34 write README leading with context engineering + measured numbers. Step 35 invite christianpickettcode and berasogut and submit.
+Resume file: `.paul/PROJECT.md` + `SPEC.md` §12 (telemetry + measured metrics) + §13 (steps 31 through 35).
 
 ---
 *STATE.md, updated after every significant action.*
