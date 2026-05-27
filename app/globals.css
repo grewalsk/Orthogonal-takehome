@@ -24,3 +24,16 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Provenance citation flash: when the user clicks a [src:tr_X] chip in
+   the assistant's text, the source tool-call card briefly pulses an
+   emerald ring so the eye lands on it after the scroll. The class is
+   added/removed by components/text-part.tsx CitationChip onClick. */
+.citation-flash {
+  animation: citation-flash 1.6s ease-out;
+}
+@keyframes citation-flash {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  20% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.45); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}

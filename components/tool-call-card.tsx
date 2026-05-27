@@ -66,7 +66,10 @@ export function ToolCallCard({ part }: Props) {
   const priceLabel = output?.price_usd !== undefined ? `$${output.price_usd.toFixed(2)}` : null;
 
   return (
-    <div className="rounded-lg border border-zinc-200 bg-zinc-50/50 text-xs dark:border-zinc-800 dark:bg-zinc-900/40">
+    <div
+      id={resultId}
+      className="scroll-mt-16 rounded-lg border border-zinc-200 bg-zinc-50/50 text-xs ring-offset-2 transition-shadow target:ring-2 target:ring-emerald-400 dark:border-zinc-800 dark:bg-zinc-900/40 dark:ring-offset-zinc-950"
+    >
       <div className="flex items-center gap-2 px-3 py-2">
         <StatusIcon state={state} />
         <span className="font-mono text-zinc-700 dark:text-zinc-300">{toolName}</span>
