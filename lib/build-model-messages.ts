@@ -41,6 +41,14 @@ export async function buildModelMessages(
 
   const dynamicBlocks: ModelMessage[] = [];
 
+  // Date block sits AFTER the cache breakpoint so the cache anchor stays
+  // stable across days. Without this, "past month" / "recently" get
+  // interpreted relative to the model's training cutoff, not real time.
+  dynamicBlocks.push({
+    role: "system",
+    content: `Today is ${new Date().toISOString().slice(0, 10)}. When the user uses relative time language ("past month", "recently", "this year"), interpret it relative to this date and NOT your training cutoff. Prefer fresh tool results over your prior knowledge when timestamps disagree.`,
+  });
+
   const manifestText = renderManifest(manifest);
   if (manifestText) {
     dynamicBlocks.push({ role: "system", content: manifestText });

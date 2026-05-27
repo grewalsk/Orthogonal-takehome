@@ -4,7 +4,13 @@ import { wrapUntrusted } from "@/lib/orthogonal/safety";
 export const inputSchema = z.object({
   q: z.string().min(1).describe("Search query"),
   depth: z.enum(["standard", "deep"]).default("standard").optional(),
-  outputType: z.enum(["searchResults", "sourcedAnswer", "structured"]).default("searchResults").optional(),
+  outputType: z
+    .enum(["searchResults", "sourcedAnswer", "structured"])
+    .default("searchResults")
+    .optional()
+    .describe(
+      "Default 'searchResults' (raw URLs + snippets, current dates visible). Use 'sourcedAnswer' ONLY when the user explicitly wants a narrative synthesis; it routes through LinkUp's own LLM which has its own training cutoff and frequently returns stale (e.g. months-old) summaries even when fresh sources exist.",
+    ),
   includeImages: z.boolean().optional(),
 });
 
