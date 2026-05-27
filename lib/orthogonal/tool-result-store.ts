@@ -65,7 +65,11 @@ export async function storeToolResult(record: ToolResultInput): Promise<string> 
     input: record.input as object,
     inputHash,
     output: record.output as object,
-    priceCents: record.priceCents,
+    // The price_cents column is integer. Some upstreams (serper) return
+    // fractional cents (0.2c) and any cached value predating the
+    // client-layer round still carries the float. Round at the persistence
+    // boundary as defense-in-depth.
+    priceCents: Math.round(record.priceCents),
     upstreamRequestId: record.upstreamRequestId,
     status: record.cacheHit ? "cache_hit" : "success",
     cacheHit: record.cacheHit,

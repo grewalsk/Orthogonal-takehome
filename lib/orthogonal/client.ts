@@ -244,7 +244,12 @@ async function callOnce(opts: CallOrthOptions): Promise<CallOrthResult> {
       throw new ToolError(code, message, res.status, upstreamRequestId);
     }
 
-    const priceCents = typeof json.priceCents === "number" ? json.priceCents : 0;
+    // Some upstreams (e.g. serper at 0.2c) return fractional cents. The
+    // tool_calls.price_cents column is integer, so we round here. Loss of
+    // precision is sub-cent (< $0.01) and the cost meter is best-effort
+    // already; a numeric/decimal migration is a candidate Phase 9 cleanup.
+    const rawPriceCents = typeof json.priceCents === "number" ? json.priceCents : 0;
+    const priceCents = Math.round(rawPriceCents);
     logCall({
       endpoint: opts.endpointSlug,
       durationMs: ms,

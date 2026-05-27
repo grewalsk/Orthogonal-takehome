@@ -136,11 +136,17 @@ function appendPaletteHint(
     "",
     "Prefer the core tools when they fit. Use a specialist only if it is the right fit for the query.",
   ].join("\n");
+  // Anthropic rejects system messages that come AFTER user/assistant turns.
+  // Insert the hint immediately before the first user message so it sits
+  // with the other dynamic system blocks at the top.
+  const firstUserIdx = modelMessages.findIndex((m) => m.role === "user");
+  const hintMessage = { role: "system" as const, content: hint };
+  if (firstUserIdx === -1) {
+    return [...modelMessages, hintMessage];
+  }
   return [
-    ...modelMessages,
-    {
-      role: "system",
-      content: hint,
-    },
+    ...modelMessages.slice(0, firstUserIdx),
+    hintMessage,
+    ...modelMessages.slice(firstUserIdx),
   ];
 }
