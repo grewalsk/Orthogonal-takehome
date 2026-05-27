@@ -3,20 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import {
-  Building2,
-  Cpu,
-  FileText,
-  Globe,
-  Mic,
-  PanelLeft,
-  Pin,
-  Plus,
-  ShieldCheck,
-  Sparkles,
-  Users,
-  type LucideIcon,
-} from "lucide-react";
+import { PanelLeft, Pin, Plus } from "lucide-react";
 
 interface ConvSummary {
   id: string;
@@ -24,34 +11,11 @@ interface ConvSummary {
   updatedAt: string;
 }
 
-interface ToolCategory {
-  id: string;
-  label: string;
-  icon: LucideIcon;
-  slugPrefixes: string[];
-}
-
-// Sidebar tool taxonomy. Each category lights up when any tool with a
-// matching slug prefix has been called in the current conversation. The
-// design's intent is "what capabilities is this assistant using right
-// now," not the full 36-endpoint list.
-const TOOL_CATEGORIES: ToolCategory[] = [
-  { id: "web", label: "Web search", icon: Globe, slugPrefixes: ["linkup_", "exa_", "serper_"] },
-  { id: "scrape", label: "Page scrape", icon: FileText, slugPrefixes: ["olostep_"] },
-  { id: "people", label: "People intel", icon: Users, slugPrefixes: ["apollo_people", "apollo_mixed_people", "hunter_domain", "hunter_email", "tomba_email", "tomba_combined", "tomba_linkedin"] },
-  { id: "company", label: "Company & brand", icon: Building2, slugPrefixes: ["apollo_organizations", "hunter_companies", "branddev_", "logo_", "fundable_", "predictleads_discover_companies"] },
-  { id: "intent", label: "Intent signals", icon: Sparkles, slugPrefixes: ["predictleads_discover_news", "predictleads_discover_financing", "predictleads_discover_job"] },
-  { id: "tech", label: "Tech detection", icon: Cpu, slugPrefixes: ["tomba_technology", "predictleads_technologies"] },
-  { id: "voice", label: "Voice & media", icon: Mic, slugPrefixes: ["elevenlabs_"] },
-  { id: "identity", label: "Identity", icon: ShieldCheck, slugPrefixes: ["didit_"] },
-];
-
 export function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(true);
   const [recent, setRecent] = useState<ConvSummary[]>([]);
-  const [toolNames, setToolNames] = useState<string[]>([]);
 
   const currentId = useMemo(() => {
     const m = pathname?.match(/^\/c\/([0-9a-f-]+)/i);
@@ -60,31 +24,17 @@ export function Sidebar() {
 
   useEffect(() => {
     let cancelled = false;
-    const url = currentId ? `/api/conversations?currentId=${currentId}` : "/api/conversations";
-    fetch(url)
-      .then((r) => (r.ok ? r.json() : { recent: [], currentToolNames: [] }))
-      .then((data: { recent: ConvSummary[]; currentToolNames: string[] }) => {
+    fetch("/api/conversations")
+      .then((r) => (r.ok ? r.json() : { recent: [] }))
+      .then((data: { recent: ConvSummary[] }) => {
         if (cancelled) return;
         setRecent(data.recent ?? []);
-        setToolNames(data.currentToolNames ?? []);
       })
       .catch(() => {});
     return () => {
       cancelled = true;
     };
-  }, [currentId, pathname]);
-
-  const usedCategories = useMemo(() => {
-    const used = new Set<string>();
-    for (const slug of toolNames) {
-      for (const cat of TOOL_CATEGORIES) {
-        if (cat.slugPrefixes.some((p) => slug.startsWith(p))) used.add(cat.id);
-      }
-    }
-    return used;
-  }, [toolNames]);
-
-  const activeCount = TOOL_CATEGORIES.filter((c) => usedCategories.has(c.id)).length;
+  }, [pathname]);
 
   return (
     <aside
@@ -123,13 +73,9 @@ export function Sidebar() {
         </button>
       </div>
 
-      {/* Sections */}
+      {/* Chats list — only visible when expanded */}
       {open && (
         <div className="min-h-0 flex-1 overflow-y-auto">
-          {/* Pinned is empty for v1 (no schema yet). Render only when we
-              add real pinned data — keeping the section as a deliberate
-              spec note rather than a stub. */}
-
           <SideSection label="Chats">
             {recent.length === 0 && (
               <div className="px-4 py-2 text-xs italic text-[var(--ink-faint)]">No chats yet.</div>
@@ -138,23 +84,6 @@ export function Sidebar() {
               <ChatRow key={c.id} id={c.id} title={c.title} active={c.id === currentId} pinned={false} />
             ))}
           </SideSection>
-        </div>
-      )}
-
-      {/* Tools in use */}
-      {open && (
-        <div className="border-t border-[var(--rule)] bg-[var(--paper-deep)] px-[6px] pt-3 pb-[14px]">
-          <div className="flex items-center gap-[6px] px-3 pb-2 text-[10.5px] font-medium uppercase tracking-[.08em] text-[var(--ink-faint)]">
-            <span>Tools in use</span>
-            <span className="rounded border border-[var(--rule)] px-1 font-mono text-[9.5px] tracking-normal">
-              {activeCount}/{TOOL_CATEGORIES.length}
-            </span>
-          </div>
-          <div className="flex flex-col gap-px">
-            {TOOL_CATEGORIES.map((c) => (
-              <ToolRow key={c.id} category={c} on={usedCategories.has(c.id)} />
-            ))}
-          </div>
         </div>
       )}
     </aside>
@@ -209,30 +138,5 @@ function ChatRow({ id, title, active, pinned }: { id: string; title: string; act
       )}
       <span className="min-w-0 flex-1 truncate">{title}</span>
     </Link>
-  );
-}
-
-function ToolRow({ category, on }: { category: ToolCategory; on: boolean }) {
-  const Icon = category.icon;
-  return (
-    <div
-      className="mx-1 flex items-center gap-[9px] rounded-md px-3 py-[6px] text-[12.5px]"
-      style={{ color: on ? "var(--ink-soft)" : "var(--ink-faint)" }}
-    >
-      <span
-        className="inline-flex"
-        style={{ color: on ? "var(--accent-ink)" : "var(--ink-faint)", opacity: on ? 1 : 0.55 }}
-      >
-        <Icon className="h-[14px] w-[14px]" strokeWidth={1.4} />
-      </span>
-      <span className="min-w-0 flex-1 truncate">{category.label}</span>
-      <span
-        className="h-[6px] w-[6px] flex-shrink-0 rounded-full"
-        style={{
-          background: on ? "var(--accent)" : "transparent",
-          border: on ? "none" : "1px solid var(--ink-faint)",
-        }}
-      />
-    </div>
   );
 }

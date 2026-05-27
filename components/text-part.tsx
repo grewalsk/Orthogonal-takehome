@@ -1,8 +1,9 @@
 "use client";
 
-import { Fragment, useMemo, type ReactNode } from "react";
-import ReactMarkdown from "react-markdown";
+import { useMemo, type ReactNode } from "react";
+import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 
 interface Props {
   text: string;
@@ -10,21 +11,42 @@ interface Props {
 
 // Matches [src:tr_XXXXXXXX] anywhere in the text. The result_id pattern
 // is "tr_" followed by 6-16 hex chars (see tool-result-store.ts
-// mintResultId). Capture group is the bare result_id so the click
-// handler can scroll to it.
+// mintResultId).
 const CITATION_RE = /\[src:(tr_[0-9a-f]{6,16})\]/g;
 
-// Body text renders in Source Serif 4 at a calm reading size, matching
-// the design's "reading material" aesthetic. We feed remark-gfm so
-// tables, strikethrough, task lists, and autolinks render properly
-// (without it, GitHub-style tables stay as literal pipes).
+// Body text renders in Source Serif 4 at a calm reading size. We feed
+// remark-gfm for tables/strikethrough/task-lists/autolinks, and
+// rehype-raw so inline HTML survives parsing — we use that to inject
+// <sup data-tr="tr_X">N</sup> placeholders in place of the raw
+// [src:tr_X] markers BEFORE rendering, then the components.sup override
+// renders our CitationChip in the right place. This way citations
+// render correctly inside table cells, blockquotes, list items, etc.
 //
-// Citations: we scan the whole message text for unique tr_ ids and
-// assign each a sequential number per message (1, 2, 3...). The visible
-// chip is just that tiny superscript number; the actual tr_ id stays as
-// the scroll target on click.
+// Each unique tr_id gets a sequential number per message (1, 2, 3...).
+// Same source cited multiple times reuses the same number.
 export function TextPart({ text }: Props) {
-  const { segments, citationNumberById } = useMemo(() => buildSegments(text), [text]);
+  const { preprocessed, idForN } = useMemo(() => buildPreprocessed(text), [text]);
+
+  const components: Components = useMemo(
+    () => ({
+      sup({ children, ...props }) {
+        // rehype-raw passes HTML attrs through as data-* lowercase. The
+        // SUP we injected carries data-tr; default <sup> tags from the
+        // model render through as-is.
+        const dataTr = (props as { "data-tr"?: string })["data-tr"];
+        if (typeof dataTr === "string" && dataTr.startsWith("tr_")) {
+          const n = parseInt(String(children).replace(/\D/g, ""), 10) || 0;
+          return <CitationChip resultId={dataTr} n={n} />;
+        }
+        return <sup {...props}>{children}</sup>;
+      },
+    }),
+    [],
+  );
+
+  // The void void var is just to silence the "unused" lint for the map
+  // that the components closure reads via its captured scope.
+  void idForN;
 
   return (
     <div
@@ -44,92 +66,68 @@ export function TextPart({ text }: Props) {
         textWrap: "pretty",
       }}
     >
-      {segments.map((seg, i) =>
-        seg.kind === "markdown" ? (
-          <ReactMarkdown key={i} remarkPlugins={[remarkGfm]}>
-            {seg.text}
-          </ReactMarkdown>
-        ) : (
-          <CitationChip
-            key={i}
-            resultId={seg.resultId}
-            n={citationNumberById.get(seg.resultId) ?? 0}
-          />
-        ),
-      )}
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeRaw]}
+        components={components}
+      >
+        {preprocessed}
+      </ReactMarkdown>
     </div>
   );
 }
 
-type Segment =
-  | { kind: "markdown"; text: string }
-  | { kind: "citation"; resultId: string };
-
-function buildSegments(text: string): { segments: Segment[]; citationNumberById: Map<string, number> } {
-  const segments: Segment[] = [];
+function buildPreprocessed(text: string): { preprocessed: string; idForN: Map<number, string> } {
   const order: string[] = [];
-  let cursor = 0;
-  const re = new RegExp(CITATION_RE.source, "g");
-  let match: RegExpExecArray | null;
-  while ((match = re.exec(text)) !== null) {
-    if (match.index > cursor) {
-      segments.push({ kind: "markdown", text: text.slice(cursor, match.index) });
+  const idToN = new Map<string, number>();
+  const replaced = text.replace(CITATION_RE, (_match, id: string) => {
+    if (!idToN.has(id)) {
+      order.push(id);
+      idToN.set(id, order.length);
     }
-    segments.push({ kind: "citation", resultId: match[1] });
-    if (!order.includes(match[1])) order.push(match[1]);
-    cursor = match.index + match[0].length;
-  }
-  if (cursor < text.length) {
-    segments.push({ kind: "markdown", text: text.slice(cursor) });
-  }
-  if (segments.length === 0) {
-    segments.push({ kind: "markdown", text });
-  }
-  const citationNumberById = new Map<string, number>();
-  order.forEach((id, i) => citationNumberById.set(id, i + 1));
-  return { segments, citationNumberById };
+    return `<sup data-tr="${id}">${idToN.get(id)}</sup>`;
+  });
+  const idForN = new Map<number, string>();
+  order.forEach((id, i) => idForN.set(i + 1, id));
+  return { preprocessed: replaced, idForN };
 }
 
 function CitationChip({ resultId, n }: { resultId: string; n: number }): ReactNode {
   return (
-    <Fragment>
-      <sup>
-        <a
-          href={`#${resultId}`}
-          onClick={(e) => {
-            e.preventDefault();
-            const el = document.getElementById(resultId);
-            if (el) {
-              el.scrollIntoView({ behavior: "smooth", block: "center" });
-              el.classList.remove("citation-flash");
-              void el.offsetWidth;
-              el.classList.add("citation-flash");
-            } else {
-              window.location.hash = resultId;
-            }
-          }}
-          title={`Source: ${resultId}`}
-          className="ml-[1px] inline-flex h-[14px] min-w-[14px] items-center justify-center rounded-[3px] px-[3px] font-mono no-underline transition"
-          style={{
-            fontSize: 9.5,
-            fontWeight: 500,
-            background: "var(--accent-soft)",
-            color: "var(--accent-ink)",
-            verticalAlign: "baseline",
-            lineHeight: 1,
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "var(--accent)";
-            e.currentTarget.style.color = "var(--paper)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "var(--accent-soft)";
-            e.currentTarget.style.color = "var(--accent-ink)";
-          }}
-        >
-          {n}
-        </a>
-      </sup>
-    </Fragment>
+    <a
+      href={`#${resultId}`}
+      onClick={(e) => {
+        e.preventDefault();
+        const el = document.getElementById(resultId);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          el.classList.remove("citation-flash");
+          void el.offsetWidth;
+          el.classList.add("citation-flash");
+        } else {
+          window.location.hash = resultId;
+        }
+      }}
+      title={`Source: ${resultId}`}
+      className="ml-[1px] inline-flex h-[14px] min-w-[14px] items-center justify-center rounded-[3px] px-[3px] font-mono no-underline transition"
+      style={{
+        fontSize: 9.5,
+        fontWeight: 500,
+        background: "var(--accent-soft)",
+        color: "var(--accent-ink)",
+        verticalAlign: "baseline",
+        lineHeight: 1,
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = "var(--accent)";
+        e.currentTarget.style.color = "var(--paper)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = "var(--accent-soft)";
+        e.currentTarget.style.color = "var(--accent-ink)";
+      }}
+    >
+      {n}
+    </a>
   );
 }
