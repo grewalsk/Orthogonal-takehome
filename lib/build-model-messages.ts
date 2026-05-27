@@ -50,12 +50,29 @@ export async function buildModelMessages(
     },
   };
 
-  // Date block sits AFTER anchor 1 so the day-rollover does not invalidate
-  // anchor 1. It is inside anchor 2 below (the day boundary still
-  // invalidates anchor 2, but that is at most once a day).
+  // Date block sits AFTER anchor 1 so the day-rollover does not
+  // invalidate anchor 1. It is inside anchor 2 below (the day boundary
+  // still invalidates anchor 2, but that is at most once a day).
+  //
+  // The block is verbose by design. Sonnet 4.6's training cutoff
+  // predates today and the model will bake year numbers from training
+  // ("OpenAI CEO 2025") into search queries unless explicitly told not
+  // to. The "do not put a year" rule below is load-bearing.
+  const now = new Date();
+  const iso = now.toISOString().slice(0, 10);
+  const year = now.getUTCFullYear();
+  const monthName = now.toLocaleString("en-US", { month: "long", timeZone: "UTC" });
   const dateBlock: ModelMessage = {
     role: "system",
-    content: `Today is ${new Date().toISOString().slice(0, 10)}. When the user uses relative time language ("past month", "recently", "this year"), interpret it relative to this date and NOT your training cutoff. Prefer fresh tool results over your prior knowledge when timestamps disagree.`,
+    content: `# Current date
+Today is ${iso} (${monthName} ${year}). When the user uses relative time language ("past month", "recently", "this year", "last year"), resolve it against this date and NOT your training cutoff. Prefer fresh tool results over your prior knowledge when timestamps disagree.
+
+# Date hygiene in search queries
+When you call a search/news/scrape tool, DO NOT bake a year number into the query string unless the user explicitly named one. The upstream search engine biases hard toward literal year matches and will return stale ${year - 1} results if you ask for "X ${year - 1}". Examples:
+- User asks "recent funding for AI startups" -> search "AI startup funding", NOT "AI startup funding ${year - 1}" or "AI startup funding ${year}".
+- User asks "OpenAI CEO" -> search "OpenAI CEO", NOT "OpenAI CEO ${year - 1}".
+- User asks "news about Stripe this week" -> use the news endpoint's tbs="qdr:w" parameter, NOT a literal year in the query.
+Only include a year if the user said "in ${year - 1}" or named one. When in doubt, omit.`,
   };
 
   // Separate the latest user message from prior history. Anchor 2 lands on

@@ -27,8 +27,12 @@ interface ProjectionShape {
   price_usd?: number;
 }
 
+// Tool calls render as a "thinking" disclosure — header always visible
+// (status icon, tool name, input pill, price) and the whole summary +
+// payload tucked behind a single click. This keeps the answer the
+// primary visual unit; the audit trail is one click away.
 export function ToolCallCard({ part }: Props) {
-  const [payloadOpen, setPayloadOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const [fullPayload, setFullPayload] = useState<unknown>(null);
   const [fetching, setFetching] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -37,16 +41,10 @@ export function ToolCallCard({ part }: Props) {
   const state = part.state ?? "input-streaming";
   const output = part.output as ProjectionShape | undefined;
   const resultId = output?.result_id;
+  const isStreaming = state !== "output-available" && state !== "output-error";
 
-  async function togglePayload() {
-    if (payloadOpen) {
-      setPayloadOpen(false);
-      return;
-    }
-    if (fullPayload || !resultId) {
-      setPayloadOpen(true);
-      return;
-    }
+  async function loadPayload() {
+    if (fullPayload || !resultId) return;
     setFetching(true);
     setFetchError(null);
     try {
@@ -54,7 +52,6 @@ export function ToolCallCard({ part }: Props) {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const body = await res.json();
       setFullPayload(body);
-      setPayloadOpen(true);
     } catch (err) {
       setFetchError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -62,15 +59,31 @@ export function ToolCallCard({ part }: Props) {
     }
   }
 
+  function toggle() {
+    const next = !expanded;
+    setExpanded(next);
+    if (next && !fullPayload) void loadPayload();
+  }
+
   const inputPill = summarizeInput(part.input);
   const priceLabel = output?.price_usd !== undefined ? `$${output.price_usd.toFixed(2)}` : null;
+  const headerInteractive = !isStreaming;
 
   return (
     <div
       id={resultId}
-      className="scroll-mt-16 rounded-lg border border-[var(--rule)] bg-[var(--paper-deep)] text-xs transition-shadow"
+      className="scroll-mt-16 overflow-hidden rounded-lg border border-[var(--rule)] bg-[var(--paper-deep)] text-xs"
     >
-      <div className="flex items-center gap-2 px-3 py-2">
+      <button
+        type="button"
+        onClick={headerInteractive ? toggle : undefined}
+        disabled={!headerInteractive}
+        className={`flex w-full items-center gap-2 px-3 py-2 text-left transition ${
+          headerInteractive ? "hover:bg-[var(--paper-edge)]" : "cursor-default"
+        }`}
+        aria-expanded={expanded}
+      >
+        <ChevronCaret expanded={expanded} streaming={isStreaming} />
         <StatusIcon state={state} />
         <span className="font-mono text-[var(--ink-soft)]">{toolName}</span>
         {inputPill && (
@@ -82,9 +95,9 @@ export function ToolCallCard({ part }: Props) {
         {priceLabel && (
           <span className="font-mono text-[10px] text-[var(--ink-faint)]">{priceLabel}</span>
         )}
-      </div>
+      </button>
 
-      {state === "output-available" && output?.summary && (
+      {expanded && state === "output-available" && output?.summary && (
         <div className="border-t border-[var(--rule)] px-3 py-2">
           <SummaryBlock endpoint={output.endpoint} summary={output.summary} />
         </div>
@@ -96,20 +109,16 @@ export function ToolCallCard({ part }: Props) {
         </div>
       )}
 
-      {resultId && (
+      {expanded && resultId && (
         <div className="border-t border-[var(--rule)] px-3 py-[6px]">
-          <button
-            onClick={togglePayload}
-            className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-wide text-[var(--ink-muted)] transition hover:text-[var(--ink)]"
-          >
-            {payloadOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-            {fetching ? "loading..." : payloadOpen ? "hide" : "view"} full payload
-            <span className="ml-1 opacity-60">{resultId}</span>
-          </button>
+          <div className="font-mono text-[10px] uppercase tracking-wide text-[var(--ink-muted)]">
+            {fetching ? "loading full payload..." : "full payload"}
+            <span className="ml-2 opacity-60">{resultId}</span>
+          </div>
           {fetchError && (
             <div className="mt-1 text-[10px] text-[var(--warn)]">{fetchError}</div>
           )}
-          {payloadOpen && fullPayload !== null && (
+          {fullPayload !== null && (
             <pre className="mt-2 max-h-72 overflow-auto rounded bg-[var(--paper)] p-2 font-mono text-[10px] text-[var(--ink-soft)]">
               {JSON.stringify(fullPayload, null, 2)}
             </pre>
@@ -117,6 +126,17 @@ export function ToolCallCard({ part }: Props) {
         </div>
       )}
     </div>
+  );
+}
+
+function ChevronCaret({ expanded, streaming }: { expanded: boolean; streaming: boolean }) {
+  if (streaming) {
+    return <span className="inline-block h-3 w-3" aria-hidden />;
+  }
+  return expanded ? (
+    <ChevronDown className="h-3 w-3 flex-shrink-0 text-[var(--ink-faint)]" strokeWidth={1.6} />
+  ) : (
+    <ChevronRight className="h-3 w-3 flex-shrink-0 text-[var(--ink-faint)]" strokeWidth={1.6} />
   );
 }
 
