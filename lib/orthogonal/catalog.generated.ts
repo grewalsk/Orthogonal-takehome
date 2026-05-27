@@ -301,6 +301,44 @@ export const catalog = [
     "verified": true
   },
   {
+    "slug": "tomba_technology",
+    "api": "tomba",
+    "path": "/v1/technology",
+    "method": "GET",
+    "description": "Discover technologies used by a website.",
+    "priceCents": 1,
+    "pathParams": [],
+    "queryParams": [
+      {
+        "name": "domain",
+        "type": "string",
+        "required": true,
+        "description": "Domain to analyze"
+      }
+    ],
+    "bodyParams": [],
+    "verified": true
+  },
+  {
+    "slug": "tomba_email_count",
+    "api": "tomba",
+    "path": "/v1/email-count",
+    "method": "GET",
+    "description": "Get the count of email addresses for a domain, broken down by department and seniority.",
+    "priceCents": 1,
+    "pathParams": [],
+    "queryParams": [
+      {
+        "name": "domain",
+        "type": "string",
+        "required": true,
+        "description": "Domain name, e.g. stripe.com"
+      }
+    ],
+    "bodyParams": [],
+    "verified": true
+  },
+  {
     "slug": "linkup_search",
     "api": "linkup",
     "path": "/search",
@@ -381,6 +419,43 @@ export const catalog = [
         "type": "number",
         "required": false,
         "description": "The maximum number of results to return."
+      }
+    ],
+    "verified": true
+  },
+  {
+    "slug": "linkup_fetch",
+    "api": "linkup",
+    "path": "/fetch",
+    "method": "POST",
+    "description": "The /fetch endpoint allows you to fetch a single webpage from a given URL.",
+    "priceCents": 1,
+    "pathParams": [],
+    "queryParams": [],
+    "bodyParams": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "The URL of the webpage you want to fetch."
+      },
+      {
+        "name": "renderJs",
+        "type": "boolean",
+        "required": false,
+        "description": "Defines whether the API should render the JavaScript of the webpage."
+      },
+      {
+        "name": "includeRawHtml",
+        "type": "boolean",
+        "required": false,
+        "description": "Defines whether the API should include the raw HTML of the webpage in its response."
+      },
+      {
+        "name": "extractImages",
+        "type": "boolean",
+        "required": false,
+        "description": "Defines whether the API should extract the images from the webpage in its response."
       }
     ],
     "verified": true
@@ -480,6 +555,1097 @@ export const catalog = [
         "description": "User-defined metadata. Not supported yet"
       }
     ],
+    "verified": true
+  },
+  {
+    "slug": "olostep_answers",
+    "api": "olostep",
+    "path": "/v1/answers",
+    "method": "POST",
+    "description": "The AI will perform actions like searching and browsing web pages to find the answer to the provided task. Execution time is 3-30s depending upon complexity. For longer tasks, use the agent endpoint instead.",
+    "priceCents": 5,
+    "pathParams": [],
+    "queryParams": [],
+    "bodyParams": [
+      {
+        "name": "task",
+        "type": "string",
+        "required": true,
+        "description": "The task to be performed."
+      },
+      {
+        "name": "json_format",
+        "type": "object",
+        "required": false,
+        "description": "The desired output JSON object with empty values as a schema, or simply describe the data you want as a string."
+      }
+    ],
+    "verified": true
+  },
+  {
+    "slug": "predictleads_discover_companies",
+    "api": "predictleads",
+    "path": "/v3/discover/companies",
+    "method": "GET",
+    "description": "Search and filter companies",
+    "priceCents": 4,
+    "pathParams": [],
+    "queryParams": [
+      {
+        "name": "location",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "sizes",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "page",
+        "type": "integer",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "bodyParams": [],
+    "verified": true
+  },
+  {
+    "slug": "predictleads_technologies",
+    "api": "predictleads",
+    "path": "/v3/technologies",
+    "method": "GET",
+    "description": "List all tracked technologies",
+    "priceCents": 4,
+    "pathParams": [],
+    "queryParams": [
+      {
+        "name": "page",
+        "type": "integer",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "fuzzy_name",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "order_by",
+        "type": "string",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "bodyParams": [],
+    "verified": true
+  },
+  {
+    "slug": "predictleads_discover_job_openings",
+    "api": "predictleads",
+    "path": "/v3/discover/job_openings",
+    "method": "GET",
+    "description": "Search and filter job openings across all companies",
+    "priceCents": 4,
+    "pathParams": [],
+    "queryParams": [
+      {
+        "name": "onet_codes",
+        "type": "string",
+        "required": false,
+        "description": "O*NET code (required if location not provided)"
+      },
+      {
+        "name": "location",
+        "type": "string",
+        "required": false,
+        "description": "Location (required if onet_codes not provided)"
+      },
+      {
+        "name": "page",
+        "type": "integer",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "bodyParams": [],
+    "verified": true
+  },
+  {
+    "slug": "predictleads_discover_financing_events",
+    "api": "predictleads",
+    "path": "/v3/discover/financing_events",
+    "method": "GET",
+    "description": "Search and filter financing events across all companies",
+    "priceCents": 4,
+    "pathParams": [],
+    "queryParams": [
+      {
+        "name": "page",
+        "type": "integer",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "company_location",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "financing_types_normalized",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "bodyParams": [],
+    "verified": true
+  },
+  {
+    "slug": "predictleads_discover_news_events",
+    "api": "predictleads",
+    "path": "/v3/discover/news_events",
+    "method": "GET",
+    "description": "Search and filter news events across all companies",
+    "priceCents": 4,
+    "pathParams": [],
+    "queryParams": [
+      {
+        "name": "page",
+        "type": "integer",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "categories",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "company_location",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "bodyParams": [],
+    "verified": true
+  },
+  {
+    "slug": "branddev_retrieve",
+    "api": "brand-dev",
+    "path": "/v1/brand/retrieve",
+    "method": "GET",
+    "description": "Retrieve logos, backdrops, colors, industry, description, and more from any domain",
+    "priceCents": 3,
+    "pathParams": [],
+    "queryParams": [
+      {
+        "name": "domain",
+        "type": "string",
+        "required": true,
+        "description": "Domain name to retrieve brand data for (e.g., 'example.com', 'google.com'). Cannot be used with name or ticker parameters."
+      },
+      {
+        "name": "force_language",
+        "type": "string",
+        "required": false,
+        "description": "Optional parameter to force the language of the retrieved brand data. Works with all three lookup methods."
+      },
+      {
+        "name": "maxSpeed",
+        "type": "boolean",
+        "required": false,
+        "description": "Optional parameter to optimize the API call for maximum speed. When set to true, the API will skip time-consuming operations for faster response at the cost of less comprehensive data. Works with all three lookup methods."
+      },
+      {
+        "name": "timeoutMS",
+        "type": "integer",
+        "required": false,
+        "description": "Optional timeout in milliseconds for the request. If the request takes longer than this value, it will be aborted with a 408 status code. Maximum allowed value is 300000ms (5 minutes)."
+      }
+    ],
+    "bodyParams": [],
+    "verified": true
+  },
+  {
+    "slug": "branddev_retrieve_by_name",
+    "api": "brand-dev",
+    "path": "/v1/brand/retrieve-by-name",
+    "method": "GET",
+    "description": "Retrieve brand information using a company name. This endpoint searches for the company by name and returns its brand data.",
+    "priceCents": 3,
+    "pathParams": [],
+    "queryParams": [
+      {
+        "name": "name",
+        "type": "string",
+        "required": true,
+        "description": "Company name to retrieve brand data for (e.g., 'Apple Inc', 'Microsoft Corporation'). Must be 3-30 characters."
+      },
+      {
+        "name": "force_language",
+        "type": "string",
+        "required": false,
+        "description": "Optional parameter to force the language of the retrieved brand data."
+      },
+      {
+        "name": "maxSpeed",
+        "type": "boolean",
+        "required": false,
+        "description": "Optional parameter to optimize the API call for maximum speed. When set to true, the API will skip time-consuming operations for faster response at the cost of less comprehensive data."
+      },
+      {
+        "name": "timeoutMS",
+        "type": "integer",
+        "required": false,
+        "description": "Optional timeout in milliseconds for the request. If the request takes longer than this value, it will be aborted with a 408 status code. Maximum allowed value is 300000ms (5 minutes)."
+      }
+    ],
+    "bodyParams": [],
+    "verified": true
+  },
+  {
+    "slug": "branddev_fonts",
+    "api": "brand-dev",
+    "path": "/v1/brand/fonts",
+    "method": "GET",
+    "description": "Extract font information from a brand’s website including font families, usage statistics, fallbacks, and element/word counts.",
+    "priceCents": 3,
+    "pathParams": [],
+    "queryParams": [
+      {
+        "name": "domain",
+        "type": "string",
+        "required": true,
+        "description": "Domain name to extract fonts from (e.g., 'example.com', 'google.com'). The domain will be automatically normalized and validated."
+      },
+      {
+        "name": "timeoutMS",
+        "type": "integer",
+        "required": false,
+        "description": "Optional timeout in milliseconds for the request. If the request takes longer than this value, it will be aborted with a 408 status code. Maximum allowed value is 300000ms (5 minutes)."
+      }
+    ],
+    "bodyParams": [],
+    "verified": true
+  },
+  {
+    "slug": "logo_search",
+    "api": "logo",
+    "path": "/search",
+    "method": "GET",
+    "description": "Search for company domains by brand name",
+    "priceCents": 1,
+    "pathParams": [],
+    "queryParams": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "strategy",
+        "type": "string",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "bodyParams": [],
+    "verified": false
+  },
+  {
+    "slug": "fundable_company_search",
+    "api": "fundable",
+    "path": "/company/search",
+    "method": "GET",
+    "description": "Search for company id using fuzzy match or other identifiers",
+    "priceCents": 1,
+    "pathParams": [],
+    "queryParams": [
+      {
+        "name": "name",
+        "type": "string",
+        "required": false,
+        "description": "Fuzzy search by company name"
+      },
+      {
+        "name": "domain",
+        "type": "string",
+        "required": false,
+        "description": "Exact match by company domain"
+      },
+      {
+        "name": "linkedin",
+        "type": "string",
+        "required": false,
+        "description": "Match by LinkedIn company URL"
+      },
+      {
+        "name": "crunchbase",
+        "type": "string",
+        "required": false,
+        "description": "Match by Crunchbase organization URL"
+      }
+    ],
+    "bodyParams": [],
+    "verified": true
+  },
+  {
+    "slug": "fundable_investor_search",
+    "api": "fundable",
+    "path": "/investor/search",
+    "method": "GET",
+    "description": "Search for an investor id using fuzzy match or other identifiers",
+    "priceCents": 1,
+    "pathParams": [],
+    "queryParams": [
+      {
+        "name": "name",
+        "type": "string",
+        "required": false,
+        "description": "Fuzzy search by investor name"
+      },
+      {
+        "name": "domain",
+        "type": "string",
+        "required": false,
+        "description": "Exact match by investor domain"
+      },
+      {
+        "name": "linkedin",
+        "type": "string",
+        "required": false,
+        "description": "Match by LinkedIn company URL"
+      },
+      {
+        "name": "crunchbase",
+        "type": "string",
+        "required": false,
+        "description": "Match by Crunchbase organization URL"
+      }
+    ],
+    "bodyParams": [],
+    "verified": true
+  },
+  {
+    "slug": "fundable_investors_search",
+    "api": "fundable",
+    "path": "/investors",
+    "method": "POST",
+    "description": "Search for investors using filters",
+    "priceCents": 66,
+    "pathParams": [],
+    "queryParams": [],
+    "bodyParams": [
+      {
+        "name": "identifiers",
+        "type": "object",
+        "required": false,
+        "description": "Lookup by ids, domains, linkedin_urls, crunchbase_urls (max 100 each)"
+      },
+      {
+        "name": "investor",
+        "type": "object",
+        "required": false,
+        "description": "Investor entity filters: locations, employee_count"
+      },
+      {
+        "name": "company_investments",
+        "type": "object",
+        "required": false,
+        "description": "Portfolio filters: company_ids, industries, super_categories, locations, employee_count, ipo_status, total_raised_min/max, financing_types, deal_size_min/max, deal_start_date, deal_end_date, only_lead_deals, min_matching_deals"
+      },
+      {
+        "name": "page",
+        "type": "number",
+        "required": false,
+        "description": "Page number (0-based, default 0)"
+      },
+      {
+        "name": "page_size",
+        "type": "number",
+        "required": false,
+        "description": "Results per page (1-100, default 25)"
+      },
+      {
+        "name": "sort_by",
+        "type": "string",
+        "required": false,
+        "description": "Sort order: most_recent_deal, oldest_deal, most_deals, fewest_deals"
+      }
+    ],
+    "verified": true
+  },
+  {
+    "slug": "elevenlabs_voices",
+    "api": "elevenlabs",
+    "path": "/v1/voices",
+    "method": "GET",
+    "description": "List all available voices for the authenticated account.",
+    "priceCents": 0,
+    "pathParams": [],
+    "queryParams": [
+      {
+        "name": "show_legacy",
+        "type": "boolean",
+        "required": false,
+        "description": "Include legacy voices in the response"
+      }
+    ],
+    "bodyParams": [],
+    "verified": false
+  },
+  {
+    "slug": "elevenlabs_models",
+    "api": "elevenlabs",
+    "path": "/v1/models",
+    "method": "GET",
+    "description": "List all available ElevenLabs models and their capabilities.",
+    "priceCents": 0,
+    "pathParams": [],
+    "queryParams": [],
+    "bodyParams": [],
+    "verified": false
+  },
+  {
+    "slug": "exa_search",
+    "api": "exa",
+    "path": "/search",
+    "method": "POST",
+    "description": "The search endpoint lets you intelligently search the web and extract contents from the results.By default, it automatically chooses the best search method using Exa’s embeddings-based model and other techniques to find the most relevant results for your query. You can also use Deep search for comprehensive results with query expansion and detailed context.",
+    "priceCents": 1,
+    "pathParams": [],
+    "queryParams": [],
+    "bodyParams": [
+      {
+        "name": "query",
+        "type": "string",
+        "required": true,
+        "description": "The query string for the search."
+      },
+      {
+        "name": "additionalQueries",
+        "type": "string[]",
+        "required": false,
+        "description": "Additional query variations for deep search. Only works with type=\"deep\". When provided, these queries are used alongside the main query for comprehensive results."
+      },
+      {
+        "name": "type",
+        "type": "enum<string>",
+        "required": false,
+        "description": "The type of search. Neural uses an embeddings-based model, auto (default) intelligently combines neural and other search methods, fast uses streamlined versions of the search models, and deep provides comprehensive search with query expansion and detailed context."
+      },
+      {
+        "name": "category",
+        "type": "enum<string>",
+        "required": false,
+        "description": "A data category to focus on. The people and company categories have improved quality for finding LinkedIn profiles and company pages. Note: The company and people categories only support a limited set of filters. The following parameters are NOT supported for these categories: startPublishedDate, endPublishedDate, startCrawlDate, endCrawlDate, includeText, excludeText, excludeDomains. For people category, includeDomains only accepts LinkedIn domains. Using unsupported parameters will result in a 400 error."
+      },
+      {
+        "name": "userLocation",
+        "type": "string",
+        "required": false,
+        "description": "The two-letter ISO country code of the user, e.g. US."
+      },
+      {
+        "name": "numResults",
+        "type": "integer",
+        "required": false,
+        "description": "Number of results to return. Limits vary by search type: With \"neural\": max 100 results With \"deep\": max 100 results If you want to increase the num results beyond these limits, contact sales (hello@exa.ai)"
+      },
+      {
+        "name": "includeDomains",
+        "type": "string[]",
+        "required": false,
+        "description": "List of domains to include in the search. If specified, results will only come from these domains."
+      },
+      {
+        "name": "excludeDomains",
+        "type": "string[]",
+        "required": false,
+        "description": "List of domains to exclude from search results. If specified, no results will be returned from these domains."
+      },
+      {
+        "name": "startCrawlDate",
+        "type": "string<date-time>",
+        "required": false,
+        "description": "Crawl date refers to the date that Exa discovered a link. Results will include links that were crawled after this date. Must be specified in ISO 8601 format."
+      },
+      {
+        "name": "endCrawlDate",
+        "type": "string<date-time>",
+        "required": false,
+        "description": "Crawl date refers to the date that Exa discovered a link. Results will include links that were crawled before this date. Must be specified in ISO 8601 format."
+      },
+      {
+        "name": "startPublishedDate",
+        "type": "string<date-time>",
+        "required": false,
+        "description": "Only links with a published date after this will be returned. Must be specified in ISO 8601 format."
+      },
+      {
+        "name": "endPublishedDate",
+        "type": "string<date-time>",
+        "required": false,
+        "description": "Only links with a published date before this will be returned. Must be specified in ISO 8601 format."
+      },
+      {
+        "name": "includeText",
+        "type": "string[]",
+        "required": false,
+        "description": "List of strings that must be present in webpage text of results. Currently, only 1 string is supported, of up to 5 words."
+      },
+      {
+        "name": "excludeText",
+        "type": "string[]",
+        "required": false,
+        "description": "List of strings that must not be present in webpage text of results. Currently, only 1 string is supported, of up to 5 words. Checks from the first 1000 words of the webpage text."
+      },
+      {
+        "name": "context",
+        "type": "string",
+        "required": false,
+        "description": "Return page contents as a context string for LLM. When true, combines all result contents into one string. We recommend using 10000+ characters for best results, though no limit works best. Context strings often perform better than highlights for RAG applications."
+      },
+      {
+        "name": "moderation",
+        "type": "boolean",
+        "required": false,
+        "description": "Enable content moderation to filter unsafe content from search results."
+      },
+      {
+        "name": "contents",
+        "type": "object",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "verified": false
+  },
+  {
+    "slug": "exa_answer",
+    "api": "exa",
+    "path": "/answer",
+    "method": "POST",
+    "description": "Get an LLM answer to a question informed by Exa search results. /answer performs an Exa search and uses an LLM to generate either:\n\nA direct answer for specific queries. (i.e. “What is the capital of France?” would return “Paris”)\nA detailed summary with citations for open-ended queries (i.e. “What is the state of ai in healthcare?” would return a summary with citations to relevant sources)\n\nThe response includes both the generated answer and the sources used to create it. The endpoint also supports streaming (as stream=True), which will return tokens as they are generated.\nAlternatively, you can use the OpenAI compatible chat completions interface.",
+    "priceCents": 1,
+    "pathParams": [],
+    "queryParams": [],
+    "bodyParams": [
+      {
+        "name": "query",
+        "type": "string",
+        "required": true,
+        "description": "The question or query to answer."
+      },
+      {
+        "name": "stream",
+        "type": "boolean",
+        "required": false,
+        "description": "If true, the response is returned as a server-sent events (SSS) stream."
+      },
+      {
+        "name": "text",
+        "type": "boolean",
+        "required": false,
+        "description": "If true, the response includes full text content in the search results"
+      }
+    ],
+    "verified": false
+  },
+  {
+    "slug": "exa_contents",
+    "api": "exa",
+    "path": "/contents",
+    "method": "POST",
+    "description": "Get the full page contents, summaries, and metadata for a list of URLs.Returns instant results from our cache, with automatic live crawling as fallback for uncached pages.",
+    "priceCents": 1,
+    "pathParams": [],
+    "queryParams": [],
+    "bodyParams": [
+      {
+        "name": "urls",
+        "type": "string[]",
+        "required": true,
+        "description": "Array of URLs to crawl (backwards compatible with 'ids' parameter)."
+      },
+      {
+        "name": "ids",
+        "type": "string[]",
+        "required": false,
+        "description": "Deprecated - use 'urls' instead. Array of document IDs obtained from searches."
+      },
+      {
+        "name": "text",
+        "type": "string",
+        "required": false,
+        "description": "If true, returns full page text with default settings. If false, disables text return."
+      },
+      {
+        "name": "highlights",
+        "type": "object",
+        "required": false,
+        "description": "Text snippets the LLM identifies as most relevant from each page."
+      },
+      {
+        "name": "summary",
+        "type": "object",
+        "required": false,
+        "description": "Summary of the webpage"
+      },
+      {
+        "name": "livecrawl",
+        "type": "enum<string>",
+        "required": false,
+        "description": "Options for livecrawling pages.'never': Disable livecrawling (default for neural search).'fallback': Livecrawl when cache is empty.'preferred': Always try to livecrawl, but fall back to cache if crawling fails.'always': Always live-crawl, never use cache. Only use if you cannot tolerate any cached content. This option is not recommended unless consulted with the Exa team."
+      },
+      {
+        "name": "livecrawlTimeout",
+        "type": "integer",
+        "required": false,
+        "description": "The timeout for livecrawling in milliseconds."
+      },
+      {
+        "name": "subpages",
+        "type": "integer",
+        "required": false,
+        "description": "The number of subpages to crawl. The actual number crawled may be limited by system constraints."
+      },
+      {
+        "name": "subpageTarget",
+        "type": "string",
+        "required": false,
+        "description": "Term to find specific subpages of search results. Can be a single string or an array of strings, comma delimited."
+      },
+      {
+        "name": "extras",
+        "type": "object",
+        "required": false,
+        "description": "Extra parameters to pass."
+      },
+      {
+        "name": "context",
+        "type": "string",
+        "required": false,
+        "description": "Return page contents as a context string for LLM. When true, combines all result contents into one string. We recommend using 10000+ characters for best results, though no limit works best. Context strings often perform better than highlights for RAG applications."
+      }
+    ],
+    "verified": false
+  },
+  {
+    "slug": "serper_search",
+    "api": "serper",
+    "path": "/search",
+    "method": "POST",
+    "description": "Google Search - returns organic results, knowledge graph, people also ask, related searches, and sitelinks. Use for general web queries, fact-finding, and research.",
+    "priceCents": 0,
+    "pathParams": [],
+    "queryParams": [],
+    "bodyParams": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query"
+      },
+      {
+        "name": "gl",
+        "type": "string",
+        "required": false,
+        "description": "Country code (e.g. us, uk, de)"
+      },
+      {
+        "name": "hl",
+        "type": "string",
+        "required": false,
+        "description": "Language code (e.g. en, es, fr)"
+      },
+      {
+        "name": "lr",
+        "type": "string",
+        "required": false,
+        "description": "Restrict results to language (e.g. lang_en, lang_fr, lang_de)"
+      },
+      {
+        "name": "cr",
+        "type": "string",
+        "required": false,
+        "description": "Restrict results to country (e.g. countryUS, countryGB, countryDE)"
+      },
+      {
+        "name": "num",
+        "type": "number",
+        "required": false,
+        "description": "Number of results (default 10, max 100)"
+      },
+      {
+        "name": "page",
+        "type": "number",
+        "required": false,
+        "description": "Page number for pagination"
+      },
+      {
+        "name": "autocorrect",
+        "type": "boolean",
+        "required": false,
+        "description": "Enable autocorrect (default true)"
+      },
+      {
+        "name": "tbs",
+        "type": "string",
+        "required": false,
+        "description": "Time filter (qdr:h=past hour, qdr:d=past day, qdr:w=past week, qdr:m=past month, qdr:y=past year)"
+      },
+      {
+        "name": "location",
+        "type": "string",
+        "required": false,
+        "description": "Location name for localized results (e.g. \"New York, NY\")"
+      },
+      {
+        "name": "safe",
+        "type": "string",
+        "required": false,
+        "description": "Safe search: \"active\" to filter explicit content, \"off\" to disable"
+      }
+    ],
+    "verified": true
+  },
+  {
+    "slug": "serper_news",
+    "api": "serper",
+    "path": "/news",
+    "method": "POST",
+    "description": "Google News search - returns news articles with titles, links, sources, dates, and snippets. Use for current events, press coverage, competitor monitoring, or media research.",
+    "priceCents": 0,
+    "pathParams": [],
+    "queryParams": [],
+    "bodyParams": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query"
+      },
+      {
+        "name": "gl",
+        "type": "string",
+        "required": false,
+        "description": "Country code (e.g. us, uk, de)"
+      },
+      {
+        "name": "hl",
+        "type": "string",
+        "required": false,
+        "description": "Language code (e.g. en, es, fr)"
+      },
+      {
+        "name": "lr",
+        "type": "string",
+        "required": false,
+        "description": "Restrict results to language (e.g. lang_en, lang_fr, lang_de)"
+      },
+      {
+        "name": "cr",
+        "type": "string",
+        "required": false,
+        "description": "Restrict results to country (e.g. countryUS, countryGB, countryDE)"
+      },
+      {
+        "name": "num",
+        "type": "number",
+        "required": false,
+        "description": "Number of results (default 10, max 100)"
+      },
+      {
+        "name": "page",
+        "type": "number",
+        "required": false,
+        "description": "Page number for pagination"
+      },
+      {
+        "name": "autocorrect",
+        "type": "boolean",
+        "required": false,
+        "description": "Enable autocorrect (default true)"
+      },
+      {
+        "name": "tbs",
+        "type": "string",
+        "required": false,
+        "description": "Time filter (qdr:h=past hour, qdr:d=past day, qdr:w=past week, qdr:m=past month, qdr:y=past year)"
+      },
+      {
+        "name": "location",
+        "type": "string",
+        "required": false,
+        "description": "Location name for localized results (e.g. \"New York, NY\")"
+      },
+      {
+        "name": "safe",
+        "type": "string",
+        "required": false,
+        "description": "Safe search: \"active\" to filter explicit content, \"off\" to disable"
+      }
+    ],
+    "verified": true
+  },
+  {
+    "slug": "serper_maps",
+    "api": "serper",
+    "path": "/maps",
+    "method": "POST",
+    "description": "Google Maps search - returns map listings with titles, addresses, latitude/longitude coordinates, ratings, review counts, phone numbers, websites, and categories. More detailed than Places for location-based queries. Use ll parameter for precise geographic targeting.",
+    "priceCents": 1,
+    "pathParams": [],
+    "queryParams": [],
+    "bodyParams": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query"
+      },
+      {
+        "name": "gl",
+        "type": "string",
+        "required": false,
+        "description": "Country code (e.g. us, uk, de)"
+      },
+      {
+        "name": "hl",
+        "type": "string",
+        "required": false,
+        "description": "Language code (e.g. en, es, fr)"
+      },
+      {
+        "name": "num",
+        "type": "number",
+        "required": false,
+        "description": "Number of results (default 10)"
+      },
+      {
+        "name": "page",
+        "type": "number",
+        "required": false,
+        "description": "Page number for pagination"
+      },
+      {
+        "name": "autocorrect",
+        "type": "boolean",
+        "required": false,
+        "description": "Enable autocorrect (default true)"
+      },
+      {
+        "name": "location",
+        "type": "string",
+        "required": false,
+        "description": "Location name for localized results (e.g. \"New York, NY\")"
+      },
+      {
+        "name": "ll",
+        "type": "string",
+        "required": false,
+        "description": "Latitude/longitude with zoom (e.g. \"@40.7128,-74.0060,15z\"). More precise than location."
+      }
+    ],
+    "verified": true
+  },
+  {
+    "slug": "didit_database_validation",
+    "api": "didit",
+    "path": "/v3/database-validation",
+    "method": "POST",
+    "description": "Validate user-provided identity data against authoritative national and global data sources.",
+    "priceCents": 31,
+    "pathParams": [],
+    "queryParams": [],
+    "bodyParams": [
+      {
+        "name": "issuing_state",
+        "type": "string",
+        "required": true,
+        "description": "ISO 3166-1 alpha-3 country code. Valid: ARG, BOL, BRA, CHL, COL, CRI, DOM, ECU, ESP, GTM, HND, MEX, PAN, PER, PRY, SLV, URY, VEN"
+      },
+      {
+        "name": "validation_type",
+        "type": "string",
+        "required": true,
+        "description": "Validation type: one_by_one or two_by_two"
+      },
+      {
+        "name": "identification_number",
+        "type": "string",
+        "required": true,
+        "description": "Universal ID field - auto-maps to country-specific format"
+      },
+      {
+        "name": "document_type",
+        "type": "string",
+        "required": false,
+        "description": "Document type: P (Passport), DL (Driver License), ID (National ID), RP (Residence Permit). Required for some countries."
+      },
+      {
+        "name": "expiration_date",
+        "type": "string",
+        "required": false,
+        "description": "Document expiration date YYYY-MM-DD. Required for some countries (e.g. ESP)."
+      },
+      {
+        "name": "first_name",
+        "type": "string",
+        "required": false,
+        "description": "First name"
+      },
+      {
+        "name": "last_name",
+        "type": "string",
+        "required": false,
+        "description": "Last name"
+      },
+      {
+        "name": "date_of_birth",
+        "type": "string",
+        "required": false,
+        "description": "Date of birth YYYY-MM-DD"
+      },
+      {
+        "name": "nationality",
+        "type": "string",
+        "required": false,
+        "description": "ISO 3166-1 alpha-3 nationality code"
+      },
+      {
+        "name": "address",
+        "type": "string",
+        "required": false,
+        "description": "Residential address"
+      }
+    ],
+    "verified": true
+  },
+  {
+    "slug": "precip_last_48",
+    "api": "precip",
+    "path": "/api/v1/last-48",
+    "method": "GET",
+    "description": "Total precipitation in the last 48 hours for the given location(s).",
+    "priceCents": 1,
+    "pathParams": [],
+    "queryParams": [
+      {
+        "name": "longitude",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "latitude",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "timeZoneId",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "format",
+        "type": "string",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "bodyParams": [],
+    "verified": true
+  },
+  {
+    "slug": "precip_daily",
+    "api": "precip",
+    "path": "/api/v1/daily",
+    "method": "GET",
+    "description": "Returns comprehensive daily precipitation data for the given time range and location(s). Each day includes precipitation amount, type (rain/snow/mixed), probability (for forecasts), and data source. Seamlessly combines historical observations with forecast data depending on the requested time range.",
+    "priceCents": 1,
+    "pathParams": [],
+    "queryParams": [
+      {
+        "name": "start",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "end",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "longitude",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "latitude",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "timeZoneId",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "format",
+        "type": "string",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "bodyParams": [],
     "verified": true
   }
 ] as const satisfies readonly CatalogEndpoint[];

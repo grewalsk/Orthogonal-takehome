@@ -35,13 +35,148 @@
     "slug": "tomba_email_verifier"
   },
   {
+    "api": "tomba",
+    "path": "/v1/technology",
+    "slug": "tomba_technology"
+  },
+  {
+    "api": "tomba",
+    "path": "/v1/email-count",
+    "slug": "tomba_email_count"
+  },
+  {
     "api": "linkup",
     "path": "/search",
     "slug": "linkup_search"
   },
   {
+    "api": "linkup",
+    "path": "/fetch",
+    "slug": "linkup_fetch"
+  },
+  {
     "api": "olostep",
     "path": "/v1/scrapes",
     "slug": "olostep_scrapes"
+  },
+  {
+    "api": "olostep",
+    "path": "/v1/answers",
+    "slug": "olostep_answers"
+  },
+  {
+    "api": "predictleads",
+    "path": "/v3/discover/companies",
+    "slug": "predictleads_discover_companies"
+  },
+  {
+    "api": "predictleads",
+    "path": "/v3/technologies",
+    "slug": "predictleads_technologies"
+  },
+  {
+    "api": "predictleads",
+    "path": "/v3/discover/job_openings",
+    "slug": "predictleads_discover_job_openings"
+  },
+  {
+    "api": "predictleads",
+    "path": "/v3/discover/financing_events",
+    "slug": "predictleads_discover_financing_events"
+  },
+  {
+    "api": "predictleads",
+    "path": "/v3/discover/news_events",
+    "slug": "predictleads_discover_news_events"
+  },
+  {
+    "api": "brand-dev",
+    "path": "/v1/brand/retrieve",
+    "slug": "branddev_retrieve"
+  },
+  {
+    "api": "brand-dev",
+    "path": "/v1/brand/retrieve-by-name",
+    "slug": "branddev_retrieve_by_name"
+  },
+  {
+    "api": "brand-dev",
+    "path": "/v1/brand/fonts",
+    "slug": "branddev_fonts"
+  },
+  {
+    "api": "logo",
+    "path": "/search",
+    "slug": "logo_search"
+  },
+  {
+    "api": "fundable",
+    "path": "/company/search",
+    "slug": "fundable_company_search"
+  },
+  {
+    "api": "fundable",
+    "path": "/investor/search",
+    "slug": "fundable_investor_search"
+  },
+  {
+    "api": "fundable",
+    "path": "/investors",
+    "slug": "fundable_investors_search"
+  },
+  {
+    "api": "elevenlabs",
+    "path": "/v1/voices",
+    "slug": "elevenlabs_voices"
+  },
+  {
+    "api": "elevenlabs",
+    "path": "/v1/models",
+    "slug": "elevenlabs_models"
+  },
+  {
+    "api": "exa",
+    "path": "/search",
+    "slug": "exa_search"
+  },
+  {
+    "api": "exa",
+    "path": "/answer",
+    "slug": "exa_answer"
+  },
+  {
+    "api": "exa",
+    "path": "/contents",
+    "slug": "exa_contents"
+  },
+  {
+    "api": "serper",
+    "path": "/search",
+    "slug": "serper_search"
+  },
+  {
+    "api": "serper",
+    "path": "/news",
+    "slug": "serper_news"
+  },
+  {
+    "api": "serper",
+    "path": "/maps",
+    "slug": "serper_maps"
+  },
+  {
+    "api": "didit",
+    "path": "/v3/database-validation",
+    "slug": "didit_database_validation"
+  },
+  {
+    "api": "precip",
+    "path": "/api/v1/last-48",
+    "slug": "precip_last_48"
+  },
+  {
+    "api": "precip",
+    "path": "/api/v1/daily",
+    "slug": "precip_daily"
   }
 ]
