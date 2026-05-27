@@ -68,49 +68,49 @@ export function ToolCallCard({ part }: Props) {
   return (
     <div
       id={resultId}
-      className="scroll-mt-16 rounded-lg border border-zinc-200 bg-zinc-50/50 text-xs ring-offset-2 transition-shadow target:ring-2 target:ring-emerald-400 dark:border-zinc-800 dark:bg-zinc-900/40 dark:ring-offset-zinc-950"
+      className="scroll-mt-16 rounded-lg border border-[var(--rule)] bg-[var(--paper-deep)] text-xs transition-shadow"
     >
       <div className="flex items-center gap-2 px-3 py-2">
         <StatusIcon state={state} />
-        <span className="font-mono text-zinc-700 dark:text-zinc-300">{toolName}</span>
+        <span className="font-mono text-[var(--ink-soft)]">{toolName}</span>
         {inputPill && (
-          <span className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-[10px] text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+          <span className="rounded bg-[var(--paper)] px-[6px] py-[2px] font-mono text-[10px] text-[var(--ink-muted)]">
             {inputPill}
           </span>
         )}
         <div className="flex-1" />
         {priceLabel && (
-          <span className="font-mono text-[10px] text-zinc-500">{priceLabel}</span>
+          <span className="font-mono text-[10px] text-[var(--ink-faint)]">{priceLabel}</span>
         )}
       </div>
 
       {state === "output-available" && output?.summary && (
-        <div className="border-t border-zinc-200 px-3 py-2 dark:border-zinc-800">
+        <div className="border-t border-[var(--rule)] px-3 py-2">
           <SummaryBlock endpoint={output.endpoint} summary={output.summary} />
         </div>
       )}
 
       {state === "output-error" && part.errorText && (
-        <div className="border-t border-zinc-200 px-3 py-2 text-red-700 dark:border-zinc-800 dark:text-red-300">
+        <div className="border-t border-[var(--rule)] px-3 py-2 text-[var(--warn)]">
           {part.errorText}
         </div>
       )}
 
       {resultId && (
-        <div className="border-t border-zinc-200 px-3 py-1.5 dark:border-zinc-800">
+        <div className="border-t border-[var(--rule)] px-3 py-[6px]">
           <button
             onClick={togglePayload}
-            className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+            className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-wide text-[var(--ink-muted)] transition hover:text-[var(--ink)]"
           >
             {payloadOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
             {fetching ? "loading..." : payloadOpen ? "hide" : "view"} full payload
-            <span className="ml-1 font-mono opacity-50">{resultId}</span>
+            <span className="ml-1 opacity-60">{resultId}</span>
           </button>
           {fetchError && (
-            <div className="mt-1 text-[10px] text-red-600">{fetchError}</div>
+            <div className="mt-1 text-[10px] text-[var(--warn)]">{fetchError}</div>
           )}
           {payloadOpen && fullPayload !== null && (
-            <pre className="mt-2 max-h-72 overflow-auto rounded bg-zinc-100 p-2 font-mono text-[10px] text-zinc-700 dark:bg-zinc-950 dark:text-zinc-300">
+            <pre className="mt-2 max-h-72 overflow-auto rounded bg-[var(--paper)] p-2 font-mono text-[10px] text-[var(--ink-soft)]">
               {JSON.stringify(fullPayload, null, 2)}
             </pre>
           )}
@@ -122,12 +122,12 @@ export function ToolCallCard({ part }: Props) {
 
 function StatusIcon({ state }: { state: string }) {
   if (state === "output-available") {
-    return <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />;
+    return <Check className="h-[14px] w-[14px] text-[var(--accent-ink)]" strokeWidth={1.6} />;
   }
   if (state === "output-error") {
-    return <AlertCircle className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />;
+    return <AlertCircle className="h-[14px] w-[14px] text-[var(--warn)]" strokeWidth={1.6} />;
   }
-  return <Loader2 className="h-3.5 w-3.5 animate-spin text-zinc-500" />;
+  return <Loader2 className="h-[14px] w-[14px] animate-spin text-[var(--ink-muted)]" strokeWidth={1.6} />;
 }
 
 function summarizeInput(input: unknown): string | null {
@@ -172,14 +172,14 @@ function SummaryBlock({
 function SummaryRows({ summary }: { summary: Record<string, unknown> }) {
   const entries = Object.entries(summary).filter(([, v]) => v !== null && v !== undefined);
   if (entries.length === 0) {
-    return <div className="italic text-zinc-500">no fields returned</div>;
+    return <div className="italic text-[var(--ink-faint)]">no fields returned</div>;
   }
   return (
     <dl className="grid grid-cols-[max-content_1fr] gap-x-3 gap-y-1">
       {entries.map(([k, v]) => (
         <div key={k} className="contents">
-          <dt className="font-mono text-zinc-500">{k}</dt>
-          <dd className="break-words text-zinc-700 dark:text-zinc-300">{formatValue(v)}</dd>
+          <dt className="font-mono text-[var(--ink-muted)]">{k}</dt>
+          <dd className="break-words text-[var(--ink-soft)]">{formatValue(v)}</dd>
         </div>
       ))}
     </dl>

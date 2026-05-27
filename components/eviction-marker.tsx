@@ -16,9 +16,9 @@ export function EvictionMarker({ evictedCount, memory }: Props) {
     <div className="my-4 select-none">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-2 border-y border-dashed border-zinc-300 py-1.5 text-[10px] uppercase tracking-wide text-zinc-500 hover:text-zinc-800 dark:border-zinc-700 dark:hover:text-zinc-200"
+        className="flex w-full items-center gap-2 border-y border-dashed border-[var(--rule)] py-[6px] font-mono text-[10.5px] uppercase tracking-[.05em] text-[var(--ink-muted)] transition hover:text-[var(--ink)]"
       >
-        <Archive className="h-3 w-3" />
+        <Archive className="h-3 w-3" strokeWidth={1.4} />
         <span>
           {evictedCount} earlier message{evictedCount === 1 ? "" : "s"} compacted into {memoryKeys.length} memory key
           {memoryKeys.length === 1 ? "" : "s"}
@@ -27,17 +27,15 @@ export function EvictionMarker({ evictedCount, memory }: Props) {
         {open ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
       </button>
       {open && (
-        <div className="mt-1 rounded border border-dashed border-zinc-200 bg-zinc-50/60 p-2 text-[11px] dark:border-zinc-800 dark:bg-zinc-950/50">
+        <div className="mt-2 rounded-md border border-dashed border-[var(--rule)] bg-[var(--paper-deep)] p-3 text-[11px]">
           {memoryKeys.length === 0 ? (
-            <div className="italic text-zinc-500">no facts extracted yet</div>
+            <div className="italic text-[var(--ink-faint)]">no facts extracted yet</div>
           ) : (
-            <dl className="grid grid-cols-[max-content_1fr] gap-x-3 gap-y-0.5">
+            <dl className="grid grid-cols-[max-content_1fr] gap-x-3 gap-y-1">
               {memoryKeys.map((k) => (
                 <div key={k} className="contents">
-                  <dt className="font-mono text-zinc-500">{k}</dt>
-                  <dd className="break-words text-zinc-700 dark:text-zinc-300">
-                    {formatValue(memory[k])}
-                  </dd>
+                  <dt className="font-mono text-[var(--ink-muted)]">{k}</dt>
+                  <dd className="break-words text-[var(--ink-soft)]">{formatValue(memory[k])}</dd>
                 </div>
               ))}
             </dl>

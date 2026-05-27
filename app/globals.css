@@ -2,38 +2,127 @@
 @plugin "@tailwindcss/typography";
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Calm paper palette adopted from the Orthogonal design bundle.
+   No gradients, no neon. Warm paper, deep ink, muted moss accent. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --paper:        oklch(0.972 0.008 85);
+  --paper-deep:   oklch(0.945 0.010 85);
+  --paper-edge:   oklch(0.905 0.012 85);
+  --ink:          oklch(0.215 0.012 255);
+  --ink-soft:     oklch(0.385 0.010 255);
+  --ink-muted:    oklch(0.555 0.008 255);
+  --ink-faint:    oklch(0.745 0.006 255);
+  --rule:         oklch(0.895 0.010 85);
+  --rule-soft:    oklch(0.925 0.008 85);
+
+  --accent:       oklch(0.555 0.062 175);
+  --accent-soft:  oklch(0.92  0.030 175);
+  --accent-ink:   oklch(0.355 0.055 175);
+
+  --warn:         oklch(0.65  0.110 60);
+
+  --shadow-card: 0 1px 0 rgba(255,255,255,.6) inset,
+                 0 1px 2px rgba(20, 24, 30, .04),
+                 0 12px 32px -20px rgba(20, 24, 30, .12);
+
+  --background: var(--paper);
+  --foreground: var(--ink);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-paper: var(--paper);
+  --color-paper-deep: var(--paper-deep);
+  --color-paper-edge: var(--paper-edge);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-rule: var(--rule);
+  --color-rule-soft: var(--rule-soft);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-source-serif);
+  --font-mono: var(--font-jetbrains);
 }
 
+/* Dark mode tokens. Kept terse: the design is paper-first and the existing
+   ThemeToggle defaults to system. Dark inverts paper to a near-black with
+   the same accent so the moss still reads. */
 html.dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --paper:       oklch(0.165 0.010 250);
+  --paper-deep:  oklch(0.205 0.010 250);
+  --paper-edge:  oklch(0.275 0.012 250);
+  --ink:         oklch(0.945 0.008 85);
+  --ink-soft:    oklch(0.835 0.008 85);
+  --ink-muted:   oklch(0.665 0.008 85);
+  --ink-faint:   oklch(0.475 0.006 85);
+  --rule:        oklch(0.285 0.012 250);
+  --rule-soft:   oklch(0.235 0.010 250);
+  --accent:      oklch(0.625 0.080 175);
+  --accent-soft: oklch(0.275 0.040 175);
+  --accent-ink:  oklch(0.835 0.060 175);
+  --shadow-card: 0 1px 0 rgba(255,255,255,.03) inset,
+                 0 1px 2px rgba(0, 0, 0, .25),
+                 0 12px 32px -20px rgba(0, 0, 0, .55);
 }
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "ss01", "cv11";
+}
+
+::selection { background: var(--accent-soft); color: var(--accent-ink); }
+
+/* Subtle paper grain. Fixed so it does not move with scroll. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(rgba(40,30,15,.018) 1px, transparent 1px),
+    radial-gradient(rgba(40,30,15,.012) 1px, transparent 1px);
+  background-size: 3px 3px, 7px 7px;
+  background-position: 0 0, 1px 2px;
+  z-index: 0;
+  mix-blend-mode: multiply;
+}
+html.dark body::before {
+  background-image:
+    radial-gradient(rgba(255,245,225,.014) 1px, transparent 1px),
+    radial-gradient(rgba(255,245,225,.008) 1px, transparent 1px);
+  mix-blend-mode: screen;
 }
 
 /* Provenance citation flash: when the user clicks a [src:tr_X] chip in
    the assistant's text, the source tool-call card briefly pulses an
-   emerald ring so the eye lands on it after the scroll. The class is
+   accent ring so the eye lands on it after the scroll. The class is
    added/removed by components/text-part.tsx CitationChip onClick. */
 .citation-flash {
   animation: citation-flash 1.6s ease-out;
 }
 @keyframes citation-flash {
-  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-  20% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.45); }
-  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  0% { box-shadow: 0 0 0 0 oklch(0.555 0.062 175 / 0); }
+  20% { box-shadow: 0 0 0 4px oklch(0.555 0.062 175 / .35); }
+  100% { box-shadow: 0 0 0 0 oklch(0.555 0.062 175 / 0); }
+}
+
+/* Streaming pulse for the "researching" dot. */
+@keyframes ortho-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: .4; transform: scale(.7); }
 }

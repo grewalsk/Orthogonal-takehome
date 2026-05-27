@@ -10,7 +10,7 @@ export function ThemeToggle() {
   useEffect(() => setMounted(true), []);
 
   if (!mounted) {
-    return <div className="h-7 w-7" aria-hidden />;
+    return <div className="h-[26px] w-[26px]" aria-hidden />;
   }
 
   const isDark = resolvedTheme === "dark";
@@ -19,9 +19,9 @@ export function ThemeToggle() {
     <button
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="inline-flex h-7 w-7 items-center justify-center rounded-md text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+      className="inline-flex h-[26px] w-[26px] items-center justify-center rounded-md text-[var(--ink-muted)] transition hover:bg-black/[0.04] hover:text-[var(--ink)]"
     >
-      {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      {isDark ? <Sun className="h-[14px] w-[14px]" strokeWidth={1.4} /> : <Moon className="h-[14px] w-[14px]" strokeWidth={1.4} />}
     </button>
   );
 }
