@@ -1,15 +1,27 @@
-// AUTO-DERIVABLE from lib/orthogonal/catalog.generated.ts plus
-// lib/orthogonal/projections/*. The structure is mechanical: one tool() per
-// curated slug, all routed through a shared executeTool() helper. Edit by
-// hand only when adding or removing a tool. To add a tool: add its entry to
-// scripts/curated-endpoints.json, run `pnpm snapshot`, hand-write its
-// projection under lib/orthogonal/projections/, then add an import + tools
-// entry below.
+// Tool palette factory for the dynamic-palette architecture.
+//
+// CORE_SLUGS is the always-loaded tier (hero-prompt coverage: Apollo
+// people/company, Hunter, Tomba, LinkUp search, Olostep scrape). Those 9
+// tool definitions live inside the Anthropic prompt cache anchor in
+// build-model-messages.ts and survive every turn unchanged.
+//
+// All other curated endpoints are SPECIALIST tier. Each turn, the LLM
+// router in lib/orthogonal/router.ts picks K specialists relevant to the
+// user message; buildToolPalette merges them with the core tools and
+// passes the result to streamText.
+//
+// Adding a new endpoint: append it to scripts/curated-endpoints.json, run
+// `pnpm snapshot`, optionally hand-write a projection under
+// lib/orthogonal/projections/<slug>.ts and add the import + PROJECTIONS
+// entry below. Endpoints without a hand-tuned projection fall through to
+// the generic projector in projections/generic.ts.
 
 import { tool } from "ai";
+import { z } from "zod";
 import { callOrth, type ParamWrapper } from "@/lib/orthogonal/client";
 import { storeToolResult } from "@/lib/orthogonal/tool-result-store";
-import { catalog } from "@/lib/orthogonal/catalog.generated";
+import { catalog, type CatalogEndpoint } from "@/lib/orthogonal/catalog.generated";
+import { buildInputSchema, genericProject } from "@/lib/orthogonal/projections/generic";
 
 import * as apollo_organizations_enrich from "@/lib/orthogonal/projections/apollo-organizations-enrich";
 import * as apollo_people_match from "@/lib/orthogonal/projections/apollo-people-match";
@@ -21,20 +33,75 @@ import * as tomba_email_verifier from "@/lib/orthogonal/projections/tomba-email-
 import * as linkup_search from "@/lib/orthogonal/projections/linkup-search";
 import * as olostep_scrapes from "@/lib/orthogonal/projections/olostep-scrapes";
 
-type AnyCatalogEntry = (typeof catalog)[number];
-const ENDPOINT_BY_SLUG: Map<string, AnyCatalogEntry> = new Map(
-  catalog.map((e) => [e.slug as string, e]),
+import * as branddev_retrieve from "@/lib/orthogonal/projections/branddev-retrieve";
+import * as exa_search from "@/lib/orthogonal/projections/exa-search";
+import * as exa_answer from "@/lib/orthogonal/projections/exa-answer";
+import * as fundable_company_search from "@/lib/orthogonal/projections/fundable-company-search";
+import * as olostep_answers from "@/lib/orthogonal/projections/olostep-answers";
+import * as predictleads_discover_financing_events from "@/lib/orthogonal/projections/predictleads-discover-financing-events";
+import * as predictleads_discover_job_openings from "@/lib/orthogonal/projections/predictleads-discover-job-openings";
+import * as predictleads_discover_news_events from "@/lib/orthogonal/projections/predictleads-discover-news-events";
+import * as serper_news from "@/lib/orthogonal/projections/serper-news";
+import * as serper_search from "@/lib/orthogonal/projections/serper-search";
+
+type ProjectFn<P = unknown> = (raw: unknown, result_id: string, price_usd: number) => P;
+
+interface ProjectionModule {
+  inputSchema: z.ZodTypeAny;
+  project: ProjectFn;
+}
+
+const PROJECTIONS: Record<string, ProjectionModule> = {
+  apollo_organizations_enrich,
+  apollo_people_match,
+  apollo_mixed_people_search,
+  hunter_domain_search,
+  hunter_email_finder,
+  hunter_companies_find,
+  tomba_email_verifier,
+  linkup_search,
+  olostep_scrapes,
+  branddev_retrieve,
+  exa_search,
+  exa_answer,
+  fundable_company_search,
+  olostep_answers,
+  predictleads_discover_financing_events,
+  predictleads_discover_job_openings,
+  predictleads_discover_news_events,
+  serper_news,
+  serper_search,
+};
+
+export const CORE_SLUGS = [
+  "apollo_organizations_enrich",
+  "apollo_people_match",
+  "apollo_mixed_people_search",
+  "hunter_domain_search",
+  "hunter_email_finder",
+  "hunter_companies_find",
+  "tomba_email_verifier",
+  "linkup_search",
+  "olostep_scrapes",
+] as const;
+
+const CORE_SLUG_SET = new Set<string>(CORE_SLUGS);
+
+export const SPECIALIST_SLUGS: string[] = catalog
+  .map((e) => e.slug)
+  .filter((slug) => !CORE_SLUG_SET.has(slug));
+
+const ENDPOINT_BY_SLUG = new Map<string, CatalogEndpoint>(
+  catalog.map((e) => [e.slug, e as CatalogEndpoint]),
 );
 
-interface EndpointMeta {
+function metaFor(slug: string): {
   api: string;
   path: string;
   paramWrapper: ParamWrapper;
   priceCents: number;
   description: string;
-}
-
-function metaFor(slug: string): EndpointMeta {
+} {
   const e = ENDPOINT_BY_SLUG.get(slug);
   if (!e) throw new Error(`Catalog missing slug: ${slug}`);
   const paramWrapper: ParamWrapper = e.method === "GET" ? "query" : "body";
@@ -49,14 +116,14 @@ function metaFor(slug: string): EndpointMeta {
 
 function describe(slug: string): string {
   const m = metaFor(slug);
-  const price = `$${(m.priceCents / 100).toFixed(2)}`;
+  const price = m.priceCents > 0 ? `$${(m.priceCents / 100).toFixed(2)}` : "free";
   return `${m.description} Costs ${price} per call. Returns a typed projection: summary + available_paths. Use read_tool_result(tr_X, "$.path") for drill-in.`;
 }
 
 async function executeTool<InputType, ProjectionType>(
   slug: string,
   input: InputType,
-  project: (raw: unknown, result_id: string, price_usd: number) => ProjectionType,
+  project: ProjectFn<ProjectionType>,
 ): Promise<ProjectionType> {
   const m = metaFor(slug);
   const result = await callOrth({
@@ -79,52 +146,50 @@ async function executeTool<InputType, ProjectionType>(
   return project(result.data, result_id, result.priceCents / 100);
 }
 
-export const orthogonalTools = {
-  apollo_organizations_enrich: tool({
-    description: describe("apollo_organizations_enrich"),
-    inputSchema: apollo_organizations_enrich.inputSchema,
-    execute: (input) => executeTool("apollo_organizations_enrich", input, apollo_organizations_enrich.project),
-  }),
-  apollo_people_match: tool({
-    description: describe("apollo_people_match"),
-    inputSchema: apollo_people_match.inputSchema,
-    execute: (input) => executeTool("apollo_people_match", input, apollo_people_match.project),
-  }),
-  apollo_mixed_people_search: tool({
-    description: describe("apollo_mixed_people_search"),
-    inputSchema: apollo_mixed_people_search.inputSchema,
-    execute: (input) => executeTool("apollo_mixed_people_search", input, apollo_mixed_people_search.project),
-  }),
-  hunter_domain_search: tool({
-    description: describe("hunter_domain_search"),
-    inputSchema: hunter_domain_search.inputSchema,
-    execute: (input) => executeTool("hunter_domain_search", input, hunter_domain_search.project),
-  }),
-  hunter_email_finder: tool({
-    description: describe("hunter_email_finder"),
-    inputSchema: hunter_email_finder.inputSchema,
-    execute: (input) => executeTool("hunter_email_finder", input, hunter_email_finder.project),
-  }),
-  hunter_companies_find: tool({
-    description: describe("hunter_companies_find"),
-    inputSchema: hunter_companies_find.inputSchema,
-    execute: (input) => executeTool("hunter_companies_find", input, hunter_companies_find.project),
-  }),
-  tomba_email_verifier: tool({
-    description: describe("tomba_email_verifier"),
-    inputSchema: tomba_email_verifier.inputSchema,
-    execute: (input) => executeTool("tomba_email_verifier", input, tomba_email_verifier.project),
-  }),
-  linkup_search: tool({
-    description: describe("linkup_search"),
-    inputSchema: linkup_search.inputSchema,
-    execute: (input) => executeTool("linkup_search", input, linkup_search.project),
-  }),
-  olostep_scrapes: tool({
-    description: describe("olostep_scrapes"),
-    inputSchema: olostep_scrapes.inputSchema,
-    execute: (input) => executeTool("olostep_scrapes", input, olostep_scrapes.project),
-  }),
-};
+function buildTool(slug: string): ReturnType<typeof tool> {
+  const endpoint = ENDPOINT_BY_SLUG.get(slug);
+  if (!endpoint) throw new Error(`Cannot build tool: catalog missing slug ${slug}`);
+  const projection = PROJECTIONS[slug];
+  const inputSchema = projection?.inputSchema ?? buildInputSchema(endpoint);
+  const project: ProjectFn = projection?.project ?? ((raw, id, price) => genericProject(raw, id, price, `${endpoint.api} ${endpoint.path}`));
+  // tool() infers its input type from inputSchema. With ad-hoc Zod schemas
+  // discovered at runtime, TS narrows to never and rejects the execute
+  // callback. Erasing the schema type is the only escape; runtime behavior
+  // (Zod validation in the SDK + execute receiving the parsed object) is
+  // unchanged. Hand-tuned tools that want full inference can still be
+  // constructed with the previous one-tool-per-slug pattern if needed.
+  return tool({
+    description: describe(slug),
+    inputSchema: inputSchema as never,
+    execute: ((input: unknown) => executeTool(slug, input as Record<string, unknown>, project)) as never,
+  });
+}
 
-export type OrthogonalToolName = keyof typeof orthogonalTools;
+function buildAllForSlugs(slugs: readonly string[]): Record<string, ReturnType<typeof tool>> {
+  const out: Record<string, ReturnType<typeof tool>> = {};
+  for (const slug of slugs) {
+    out[slug] = buildTool(slug);
+  }
+  return out;
+}
+
+export const coreTools: Record<string, ReturnType<typeof tool>> = buildAllForSlugs(CORE_SLUGS);
+
+const SPECIALIST_TOOL_BY_SLUG: Record<string, ReturnType<typeof tool>> = buildAllForSlugs(SPECIALIST_SLUGS);
+
+export function buildToolPalette(specialistSlugs: readonly string[]): Record<string, ReturnType<typeof tool>> {
+  const specialists: Record<string, ReturnType<typeof tool>> = {};
+  for (const slug of specialistSlugs) {
+    const t = SPECIALIST_TOOL_BY_SLUG[slug];
+    if (t) specialists[slug] = t;
+  }
+  return { ...coreTools, ...specialists };
+}
+
+export function specialistPool(): Array<{ slug: string; description: string; api: string }> {
+  return SPECIALIST_SLUGS.map((slug) => {
+    const m = metaFor(slug);
+    return { slug, description: m.description, api: m.api };
+  });
+}
+

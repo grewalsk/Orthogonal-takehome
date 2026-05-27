@@ -1,10 +1,11 @@
 import { stepCountIs, streamText, type UIMessage } from "ai";
 import { mainModel } from "@/lib/llm";
-import { orthogonalTools } from "@/lib/orthogonal/tools.generated";
+import { buildToolPalette, specialistPool } from "@/lib/orthogonal/tools.generated";
 import { memory_read, memory_write, read_tool_result } from "@/lib/orthogonal/context-tools";
 import { runWithRequestContext } from "@/lib/orthogonal/context";
 import { buildModelMessages } from "@/lib/build-model-messages";
 import { maybeTriggerEviction } from "@/lib/eviction";
+import { routeTools } from "@/lib/orthogonal/router";
 import {
   createPendingAssistantMessage,
   ensureConversation,
@@ -43,13 +44,31 @@ export async function POST(req: Request) {
 
   const assistantMessageId = await createPendingAssistantMessage(conversationId, "claude-sonnet-4-6");
 
-  const modelMessages = await buildModelMessages(conversationId, uiMessages);
+  // Run the specialist router in parallel with prompt assembly. Router
+  // latency (~1.5s mean) hides behind the database reads in
+  // buildModelMessages, so the user does not pay it sequentially.
+  const userText = extractText(lastUserMessage);
+  const recentContextText = recentContext(uiMessages);
+  const [modelMessages, routerResult] = await Promise.all([
+    buildModelMessages(conversationId, uiMessages),
+    routeTools({
+      userMessage: userText,
+      specialists: specialistPool(),
+      recentContext: recentContextText,
+      k: 6,
+    }),
+  ]);
+
+  const palette = buildToolPalette(routerResult.selected);
+  const tools = { ...palette, read_tool_result, memory_write, memory_read };
+
+  const messagesWithPaletteHint = appendPaletteHint(modelMessages, routerResult.selected, routerResult.reasoning);
 
   return runWithRequestContext({ conversationId, messageId: assistantMessageId }, async () => {
     const result = streamText({
       model: mainModel,
-      messages: modelMessages,
-      tools: { ...orthogonalTools, read_tool_result, memory_write, memory_read },
+      messages: messagesWithPaletteHint,
+      tools,
       stopWhen: stepCountIs(8),
       experimental_telemetry: { isEnabled: true },
     });
@@ -77,4 +96,51 @@ export async function POST(req: Request) {
       },
     });
   });
+}
+
+function extractText(message: UIMessage): string {
+  if (!Array.isArray(message.parts)) return "";
+  return message.parts
+    .filter((p): p is { type: "text"; text: string } => (p as { type?: string }).type === "text")
+    .map((p) => p.text)
+    .join("\n");
+}
+
+function recentContext(uiMessages: UIMessage[]): string {
+  // Last assistant message and the second-to-last user message, if any.
+  // Gives the router enough context for follow-up queries like "what about
+  // their funding" without bloating the router prompt.
+  const tail = uiMessages.slice(-5, -1);
+  const lines: string[] = [];
+  for (const m of tail) {
+    const text = extractText(m);
+    if (!text) continue;
+    lines.push(`${m.role.toUpperCase()}: ${text.slice(0, 400)}`);
+  }
+  return lines.join("\n");
+}
+
+function appendPaletteHint(
+  modelMessages: Awaited<ReturnType<typeof buildModelMessages>>,
+  selected: string[],
+  reasoning: string,
+): typeof modelMessages {
+  if (selected.length === 0) return modelMessages;
+  const hint = [
+    "# Specialist endpoints loaded for this turn",
+    "",
+    "The router added the following endpoints to your palette based on the user's request:",
+    ...selected.map((s) => `- ${s}`),
+    "",
+    `Router reasoning: ${reasoning}`,
+    "",
+    "Prefer the core tools when they fit. Use a specialist only if it is the right fit for the query.",
+  ].join("\n");
+  return [
+    ...modelMessages,
+    {
+      role: "system",
+      content: hint,
+    },
+  ];
 }
