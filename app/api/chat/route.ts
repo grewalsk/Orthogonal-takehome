@@ -45,29 +45,32 @@ export async function POST(req: Request) {
   const assistantMessageId = await createPendingAssistantMessage(conversationId, "claude-sonnet-4-6");
 
   // Run the specialist router in parallel with prompt assembly. Router
-  // latency (~1.5s mean) hides behind the database reads in
-  // buildModelMessages, so the user does not pay it sequentially.
+  // latency (~1.5s mean) hides behind the database reads inside
+  // buildModelMessages, so the user does not pay it sequentially. The
+  // palette hint is rendered inside the latest user message content
+  // (with manifest + memory) so anchor 2 on the historical tail stays
+  // stable across turns.
   const userText = extractText(lastUserMessage);
   const recentContextText = recentContext(uiMessages);
+  const routerPromise = routeTools({
+    userMessage: userText,
+    specialists: specialistPool(),
+    recentContext: recentContextText,
+    k: 6,
+  }).then((r) => ({ selected: r.selected, reasoning: r.reasoning }));
+
   const [modelMessages, routerResult] = await Promise.all([
-    buildModelMessages(conversationId, uiMessages),
-    routeTools({
-      userMessage: userText,
-      specialists: specialistPool(),
-      recentContext: recentContextText,
-      k: 6,
-    }),
+    buildModelMessages(conversationId, uiMessages, { paletteHintPromise: routerPromise }),
+    routerPromise,
   ]);
 
   const palette = buildToolPalette(routerResult.selected);
   const tools = { ...palette, read_tool_result, memory_write, memory_read };
 
-  const messagesWithPaletteHint = appendPaletteHint(modelMessages, routerResult.selected, routerResult.reasoning);
-
   return runWithRequestContext({ conversationId, messageId: assistantMessageId }, async () => {
     const result = streamText({
       model: mainModel,
-      messages: messagesWithPaletteHint,
+      messages: modelMessages,
       tools,
       stopWhen: stepCountIs(8),
       experimental_telemetry: { isEnabled: true },
@@ -120,33 +123,3 @@ function recentContext(uiMessages: UIMessage[]): string {
   return lines.join("\n");
 }
 
-function appendPaletteHint(
-  modelMessages: Awaited<ReturnType<typeof buildModelMessages>>,
-  selected: string[],
-  reasoning: string,
-): typeof modelMessages {
-  if (selected.length === 0) return modelMessages;
-  const hint = [
-    "# Specialist endpoints loaded for this turn",
-    "",
-    "The router added the following endpoints to your palette based on the user's request:",
-    ...selected.map((s) => `- ${s}`),
-    "",
-    `Router reasoning: ${reasoning}`,
-    "",
-    "Prefer the core tools when they fit. Use a specialist only if it is the right fit for the query.",
-  ].join("\n");
-  // Anthropic rejects system messages that come AFTER user/assistant turns.
-  // Insert the hint immediately before the first user message so it sits
-  // with the other dynamic system blocks at the top.
-  const firstUserIdx = modelMessages.findIndex((m) => m.role === "user");
-  const hintMessage = { role: "system" as const, content: hint };
-  if (firstUserIdx === -1) {
-    return [...modelMessages, hintMessage];
-  }
-  return [
-    ...modelMessages.slice(0, firstUserIdx),
-    hintMessage,
-    ...modelMessages.slice(firstUserIdx),
-  ];
-}
