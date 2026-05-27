@@ -181,7 +181,7 @@ async function callOnce(opts: CallOrthOptions): Promise<CallOrthResult> {
   if (!key) {
     throw new ToolError("UNAUTHORIZED", "ORTHOGONAL_API_KEY is not configured");
   }
-  const timeoutMs = opts.timeoutMs ?? 30_000;
+  const timeoutMs = opts.timeoutMs ?? timeoutForEndpoint(opts.endpointSlug, opts.api);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   const started = Date.now();
@@ -314,6 +314,37 @@ function mapErrorCode(httpStatus: number, orthCode?: string): ToolErrorCode {
   if (httpStatus === 400 || httpStatus === 422) return "BAD_REQUEST";
   if (httpStatus >= 500) return "UPSTREAM_ERROR";
   return "UPSTREAM_ERROR";
+}
+
+// Per-endpoint upstream timeout. Overrides are by slug (more specific)
+// then by api (provider default). Anything not matched falls through to
+// 30s, which was the prior global default. Values chosen from upstream
+// behavior observed during Phase 8 probes.
+const TIMEOUT_BY_SLUG: Record<string, number> = {
+  olostep_answers: 90_000,
+  olostep_scrapes: 60_000,
+};
+const TIMEOUT_BY_API: Record<string, number> = {
+  apollo: 10_000,
+  hunter: 10_000,
+  tomba: 10_000,
+  logo: 10_000,
+  serper: 15_000,
+  precip: 15_000,
+  fundable: 20_000,
+  "brand-dev": 20_000,
+  linkup: 30_000,
+  exa: 30_000,
+  predictleads: 45_000,
+  elevenlabs: 30_000,
+  didit: 30_000,
+};
+const DEFAULT_TIMEOUT_MS = 30_000;
+
+export function timeoutForEndpoint(endpointSlug: string, api?: string): number {
+  if (endpointSlug in TIMEOUT_BY_SLUG) return TIMEOUT_BY_SLUG[endpointSlug];
+  if (api && api in TIMEOUT_BY_API) return TIMEOUT_BY_API[api];
+  return DEFAULT_TIMEOUT_MS;
 }
 
 export function ttlForEndpoint(endpointSlug: string): number {
