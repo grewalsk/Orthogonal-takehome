@@ -18,10 +18,15 @@
 
 import { tool } from "ai";
 import { z } from "zod";
-import { callOrth, type ParamWrapper } from "@/lib/orthogonal/client";
+import { callOrth, type ParamWrapper, ToolError } from "@/lib/orthogonal/client";
 import { storeToolResult } from "@/lib/orthogonal/tool-result-store";
 import { catalog, type CatalogEndpoint } from "@/lib/orthogonal/catalog.generated";
 import { buildInputSchema, genericProject } from "@/lib/orthogonal/projections/generic";
+
+// Sentinel string the UI scans for to render the credits-exhausted
+// banner. The model also reads this in the tool-error text and treats
+// it as a stop-calling-tools signal per the system prompt.
+export const ORTH_CREDITS_EXHAUSTED_MARKER = "ORTH_CREDITS_EXHAUSTED";
 
 import * as apollo_organizations_enrich from "@/lib/orthogonal/projections/apollo-organizations-enrich";
 import * as apollo_people_match from "@/lib/orthogonal/projections/apollo-people-match";
@@ -126,13 +131,29 @@ async function executeTool<InputType, ProjectionType>(
   project: ProjectFn<ProjectionType>,
 ): Promise<ProjectionType> {
   const m = metaFor(slug);
-  const result = await callOrth({
-    endpointSlug: slug,
-    api: m.api,
-    path: m.path,
-    paramWrapper: m.paramWrapper,
-    params: input as Record<string, unknown>,
-  });
+  let result;
+  try {
+    result = await callOrth({
+      endpointSlug: slug,
+      api: m.api,
+      path: m.path,
+      paramWrapper: m.paramWrapper,
+      params: input as Record<string, unknown>,
+    });
+  } catch (err) {
+    // Surface credits-exhausted with a marker the UI and model both
+    // detect. The model is instructed in the system prompt to stop
+    // calling tools when it sees this; the UI renders a prominent
+    // top-up callout instead of the generic red error blob.
+    if (err instanceof ToolError && err.code === "INSUFFICIENT_CREDITS") {
+      throw new Error(
+        `${ORTH_CREDITS_EXHAUSTED_MARKER}: The Orthogonal API key has run out of credits. ` +
+          `All further tool calls will fail until the key is topped up at https://orthogonal.com. ` +
+          `STOP calling tools and tell the user to top up before trying again.`,
+      );
+    }
+    throw err;
+  }
   const result_id = await storeToolResult({
     slug,
     api: m.api,

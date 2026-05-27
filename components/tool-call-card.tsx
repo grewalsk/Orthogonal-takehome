@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Loader2, AlertCircle, ChevronDown, ChevronRight } from "lucide-react";
+import { Check, Loader2, AlertCircle, ChevronDown, ChevronRight, CreditCard, ExternalLink } from "lucide-react";
 import { ContactCard } from "@/components/contact-card";
 import { CompanyCard } from "@/components/company-card";
 import { SearchResultList } from "@/components/search-result-list";
+
+const ORTH_CREDITS_MARKER = "ORTH_CREDITS_EXHAUSTED";
 
 interface Props {
   part: ToolPart;
@@ -104,9 +106,13 @@ export function ToolCallCard({ part }: Props) {
       )}
 
       {state === "output-error" && part.errorText && (
-        <div className="border-t border-[var(--rule)] px-3 py-2 text-[var(--warn)]">
-          {part.errorText}
-        </div>
+        part.errorText.includes(ORTH_CREDITS_MARKER) ? (
+          <CreditsExhaustedCallout />
+        ) : (
+          <div className="border-t border-[var(--rule)] px-3 py-2 text-[var(--warn)]">
+            {part.errorText}
+          </div>
+        )
       )}
 
       {expanded && resultId && (
@@ -125,6 +131,35 @@ export function ToolCallCard({ part }: Props) {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+function CreditsExhaustedCallout() {
+  return (
+    <div
+      className="border-t border-[var(--rule)] px-3 py-3"
+      style={{ background: "oklch(0.96 0.04 60 / 0.55)" }}
+    >
+      <div className="flex items-start gap-2 text-[var(--ink)]">
+        <CreditCard className="mt-px h-4 w-4 flex-shrink-0 text-[var(--warn)]" strokeWidth={1.6} />
+        <div className="flex-1 text-[12.5px] leading-[1.5]">
+          <div className="font-medium">Orthogonal API credits exhausted.</div>
+          <div className="mt-[2px] text-[var(--ink-soft)]">
+            All further tool calls will fail until credits are topped up. The chat (LLM only) still works, but no
+            new real-data lookups can run.
+          </div>
+          <a
+            href="https://orthogonal.com"
+            target="_blank"
+            rel="noreferrer"
+            className="mt-2 inline-flex items-center gap-[5px] rounded border border-[var(--rule)] bg-[var(--paper)] px-[10px] py-[5px] font-mono text-[11px] text-[var(--ink)] no-underline transition hover:border-[var(--ink-faint)]"
+          >
+            Top up at orthogonal.com
+            <ExternalLink className="h-[11px] w-[11px]" strokeWidth={1.6} />
+          </a>
+        </div>
+      </div>
     </div>
   );
 }

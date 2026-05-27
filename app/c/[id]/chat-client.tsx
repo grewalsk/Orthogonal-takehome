@@ -3,13 +3,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
-import { Share2 } from "lucide-react";
+import { CreditCard, ExternalLink, Share2 } from "lucide-react";
 import { MessageList } from "@/components/message-list";
 import { CostMeter } from "@/components/cost-meter";
 import { EvictionMarker } from "@/components/eviction-marker";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Composer } from "@/components/composer";
 import { EmptyState } from "@/components/empty-state";
+
+const ORTH_CREDITS_MARKER = "ORTH_CREDITS_EXHAUSTED";
 
 interface Props {
   conversationId: string;
@@ -37,6 +39,27 @@ export function ChatClient({ conversationId, initialMessages, evictedCount, memo
 
   const busy = status === "submitted" || status === "streaming";
   const empty = messages.length === 0 && !busy;
+
+  // Scan every assistant message for a tool-output-error part containing
+  // the credits-exhausted marker. Persistent banner is more useful than
+  // burying the warning inside a collapsed thinking dropdown.
+  const creditsExhausted = useMemo(() => {
+    for (const m of messages) {
+      if (m.role !== "assistant" || !Array.isArray(m.parts)) continue;
+      for (const p of m.parts) {
+        const part = p as { type?: string; state?: string; errorText?: string };
+        if (
+          part.type?.startsWith("tool-") &&
+          part.state === "output-error" &&
+          typeof part.errorText === "string" &&
+          part.errorText.includes(ORTH_CREDITS_MARKER)
+        ) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }, [messages]);
 
   const title = useMemo(() => {
     const firstUser = messages.find((m) => m.role === "user");
@@ -93,6 +116,30 @@ export function ChatClient({ conversationId, initialMessages, evictedCount, memo
         </button>
         <ThemeToggle />
       </header>
+
+      {creditsExhausted && (
+        <div
+          className="flex items-center gap-2 border-b border-[var(--rule-soft)] px-7 py-2 text-[12.5px] text-[var(--ink)]"
+          style={{ background: "oklch(0.96 0.04 60 / 0.7)" }}
+        >
+          <CreditCard className="h-[14px] w-[14px] flex-shrink-0 text-[var(--warn)]" strokeWidth={1.6} />
+          <span className="flex-1">
+            <span className="font-medium">Orthogonal API credits exhausted.</span>{" "}
+            <span className="text-[var(--ink-soft)]">
+              The assistant can still chat, but no new data lookups will succeed until the key is topped up.
+            </span>
+          </span>
+          <a
+            href="https://orthogonal.com"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-[5px] rounded border border-[var(--rule)] bg-[var(--paper)] px-[10px] py-[5px] font-mono text-[11px] text-[var(--ink)] no-underline transition hover:border-[var(--ink-faint)]"
+          >
+            Top up
+            <ExternalLink className="h-[11px] w-[11px]" strokeWidth={1.6} />
+          </a>
+        </div>
+      )}
 
       {/* Body */}
       <main className="relative flex-1 overflow-y-auto">
