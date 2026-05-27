@@ -191,7 +191,18 @@ async function callOnce(opts: CallOrthOptions): Promise<CallOrthResult> {
     api: opts.api,
     path: opts.path,
   };
-  body[wrapperField] = opts.params;
+  if (wrapperField === "query") {
+    // Orthogonal forwards query values to upstream as-is (no coercion). Some
+    // providers (e.g. predictleads) reject numeric values with "Expected
+    // string, received number" even when their schema labels the field
+    // integer. HTTP query strings are inherently strings, so stringifying
+    // primitives here is universally safe.
+    body[wrapperField] = Object.fromEntries(
+      Object.entries(opts.params).map(([k, v]) => [k, stringifyPrimitive(v)]),
+    );
+  } else {
+    body[wrapperField] = opts.params;
+  }
 
   try {
     const res = await fetch(`${BASE}/v1/run`, {
@@ -327,4 +338,11 @@ function logCall(entry: LogEntry): void {
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function stringifyPrimitive(v: unknown): unknown {
+  if (v === null || v === undefined) return v;
+  const t = typeof v;
+  if (t === "string" || t === "object") return v;
+  return String(v);
 }
